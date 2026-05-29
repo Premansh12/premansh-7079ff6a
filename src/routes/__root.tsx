@@ -55,10 +55,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "Premansh Panigrahi — Designer, Developer, Future Doctor" },
+      { name: "description", content: "Portfolio of Premansh Panigrahi — web design, branding, development, UI/UX, video, and the long road to medicine." },
       { name: "author", content: "Premansh Panigrahi" },
       { property: "og:site_name", content: "Premansh Panigrahi" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "Premansh Panigrahi — Designer, Developer, Future Doctor" },
+      { name: "twitter:title", content: "Premansh Panigrahi — Designer, Developer, Future Doctor" },
+      { property: "og:description", content: "Portfolio of Premansh Panigrahi — web design, branding, development, UI/UX, video, and the long road to medicine." },
+      { name: "twitter:description", content: "Portfolio of Premansh Panigrahi — web design, branding, development, UI/UX, video, and the long road to medicine." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7d1eb278-a13b-4d1f-a765-ad9fd195ac77/id-preview-c429a6c5--b5a59a88-77d0-4411-8270-f788af1c6294.lovable.app-1780078782566.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7d1eb278-a13b-4d1f-a765-ad9fd195ac77/id-preview-c429a6c5--b5a59a88-77d0-4411-8270-f788af1c6294.lovable.app-1780078782566.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
