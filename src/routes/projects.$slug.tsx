@@ -26,6 +26,24 @@ export const Route = createFileRoute("/projects/$slug")({
         ...(p ? [{ property: "og:image", content: p.cover }] : []),
       ],
       links: [{ rel: "canonical", href: `/projects/${params.slug}` }],
+      ...(p
+        ? {
+            scripts: [
+              {
+                type: "application/ld+json",
+                children: JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "Article",
+                  headline: p.title,
+                  description: p.tagline,
+                  image: p.cover,
+                  author: { "@type": "Person", name: "Premansh Panigrahi" },
+                  datePublished: p.year,
+                }),
+              },
+            ],
+          }
+        : {}),
     };
   },
   notFoundComponent: () => (
@@ -105,6 +123,7 @@ function ProjectPage() {
                 <button
                   type="button"
                   onClick={() => setLightboxIndex(i)}
+                  aria-label={`View image ${i + 1} of ${project.title} in full size`}
                   className="group block w-full overflow-hidden bg-background"
                 >
                   <img
