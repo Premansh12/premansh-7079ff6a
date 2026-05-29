@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowUpRight, ArrowDown, Send, Sparkles } from "lucide-react";
-import { HeroCanvas } from "@/components/hero-canvas";
+import { ArrowUpRight, ArrowDown, Send } from "lucide-react";
 import { Reveal } from "@/components/reveal";
+import heroPortrait from "@/assets/premansh-hero.png";
 import { projects } from "@/data/projects";
 
 export const Route = createFileRoute("/")({
@@ -53,36 +53,75 @@ function Index() {
 
 function Hero() {
   return (
-    <section id="top" className="relative flex min-h-[100svh] items-center overflow-hidden px-6 md:px-12">
-      <HeroCanvas />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/0 via-background/0 to-background" />
-      <div className="relative mx-auto w-full max-w-7xl pt-32 md:pt-0">
-        <p className="mb-6 flex items-center gap-2 text-xs uppercase tracking-[0.35em] text-muted-foreground">
-          <Sparkles className="h-3 w-3 text-gold" /> Premansh Panigrahi
-        </p>
-        <h1 className="font-serif text-[clamp(2.75rem,8vw,8.5rem)] leading-[0.95] tracking-tight">
-          <span className="sr-only">Premansh Panigrahi — </span>
-          Just making <em className="italic text-gold">cool</em> things
-          <br />
-          with cool people.
-        </h1>
-        <p className="mt-8 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-          Designer, developer, and future doctor — building work that's quiet on the outside,
-          ambitious underneath.
-        </p>
-        <div className="mt-10 flex flex-wrap items-center gap-4">
-          <Link to="/projects" className="group inline-flex items-center gap-3 rounded-full bg-foreground px-6 py-3 text-sm text-background transition-transform hover:-translate-y-0.5">
-            View selected work
-            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </Link>
-          <a href="#contact" className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm hover:border-gold hover:text-gold transition-colors">
-            Start a conversation
-          </a>
+    <section
+      id="top"
+      className="relative flex min-h-[100svh] items-center overflow-hidden bg-[#050505] text-[#F5F5F5]"
+    >
+      {/* Portrait as full background */}
+      <img
+        src={heroPortrait}
+        alt="Premansh Panigrahi portrait"
+        className="absolute inset-0 h-full w-full object-cover object-center animate-[heroFade_1.6s_ease-out_both]"
+        loading="eager"
+        fetchPriority="high"
+      />
+
+      {/* Cinematic overlays: base darken, right-side readability gradient, vignette */}
+      <div className="pointer-events-none absolute inset-0 bg-black/45" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-l from-black/85 via-black/40 to-black/10" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
+
+      {/* Subtle golden ambient glow behind text */}
+      <div className="pointer-events-none absolute right-[5%] top-1/2 h-[60vh] w-[60vh] -translate-y-1/2 rounded-full bg-[#D4A54A]/10 blur-[120px]" />
+
+      {/* Faint dust particles */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-screen [background:radial-gradient(1px_1px_at_20%_30%,#fff,transparent_60%),radial-gradient(1px_1px_at_70%_60%,#fff,transparent_60%),radial-gradient(1.5px_1.5px_at_85%_20%,#D4A54A,transparent_60%),radial-gradient(1px_1px_at_40%_80%,#fff,transparent_60%),radial-gradient(1px_1px_at_55%_15%,#D4A54A,transparent_60%)]" />
+
+      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 px-6 pt-32 md:grid-cols-12 md:px-12 md:pt-0">
+        <div className="md:col-span-6 md:col-start-7 md:pl-6">
+          <p className="mb-6 text-[11px] uppercase tracking-[0.45em] text-[#D4A54A] animate-[fadeUp_900ms_ease-out_300ms_both]">
+            Premansh Panigrahi
+          </p>
+          <h1 className="font-serif font-light text-[clamp(2.75rem,7.5vw,7rem)] leading-[0.98] tracking-tight text-[#F5F5F5]">
+            <span className="sr-only">Premansh Panigrahi — </span>
+            <span className="inline-block animate-[fadeUp_900ms_ease-out_500ms_both]">Just</span>{" "}
+            <span className="inline-block animate-[fadeUp_900ms_ease-out_600ms_both]">making</span>{" "}
+            <span className="inline-block italic text-[#D4A54A] animate-[fadeUp_900ms_ease-out_700ms_both]">cool</span>{" "}
+            <span className="inline-block animate-[fadeUp_900ms_ease-out_800ms_both]">things</span>
+            <br />
+            <span className="inline-block animate-[fadeUp_900ms_ease-out_900ms_both]">with</span>{" "}
+            <span className="inline-block italic text-[#D4A54A] animate-[fadeUp_900ms_ease-out_1000ms_both]">cool</span>{" "}
+            <span className="inline-block animate-[fadeUp_900ms_ease-out_1100ms_both]">people.</span>
+          </h1>
+          <p className="mt-8 max-w-xl text-base leading-relaxed text-[#D8D8D8] md:text-lg animate-[fadeUp_900ms_ease-out_1300ms_both]">
+            Designer, developer, and future doctor — building work that's quiet on the outside,
+            ambitious underneath.
+          </p>
+          <div className="mt-10 flex flex-wrap items-center gap-4 animate-[fadeUp_900ms_ease-out_1500ms_both]">
+            <Link
+              to="/projects"
+              className="group inline-flex items-center gap-3 rounded-full bg-[#F5F5F5] px-7 py-3.5 text-sm font-medium text-[#0B0B0B] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_0_40px_-8px_rgba(212,165,74,0.65)]"
+            >
+              View Selected Work
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </Link>
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 rounded-full border border-[#F5F5F5]/25 bg-white/[0.03] px-7 py-3.5 text-sm text-[#F5F5F5] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D4A54A] hover:text-[#D4A54A] hover:shadow-[0_0_30px_-10px_rgba(212,165,74,0.5)]"
+            >
+              Start a Conversation
+            </a>
+          </div>
         </div>
       </div>
-      <a href="#about" aria-label="Scroll" className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+
+      <a
+        href="#about"
+        aria-label="Scroll"
+        className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] uppercase tracking-[0.4em] text-[#D8D8D8]/70 animate-[fadeUp_900ms_ease-out_1800ms_both]"
+      >
         Scroll
-        <ArrowDown className="h-4 w-4 animate-bounce text-gold" />
+        <ArrowDown className="h-4 w-4 animate-bounce text-[#D4A54A]" />
       </a>
     </section>
   );
