@@ -17,7 +17,7 @@ export const projects: Project[] = [
   {
     slug: "lumen-atelier",
     title: "Lumen Atelier",
-    tagline: "Identity & site for a Paris-based lighting studio.",
+    tagline: "A full identity rebrand and editorial digital flagship for a Paris-based boutique lighting studio specialising in hand-blown glass.",
     role: "Brand · UI/UX · Web Development",
     year: "2025",
     cover: "https://picsum.photos/seed/lumen-cover/1600/1000",
@@ -107,7 +107,7 @@ export const projects: Project[] = [
   {
     slug: "maison-noire",
     title: "Maison Noire",
-    tagline: "E-commerce flagship for a slow-fashion atelier.",
+    tagline: "A bespoke Shopify Hydrogen e-commerce flagship for a Lisbon slow-fashion atelier, treating every garment like a published editorial piece.",
     role: "Brand · UI/UX · Shopify Hydrogen",
     year: "2024",
     cover: "https://picsum.photos/seed/maison-cover/1600/1000",

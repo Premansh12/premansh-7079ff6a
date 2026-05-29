@@ -55,8 +55,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Premansh Panigrahi — Designer, Developer, Future Doctor" },
-      { name: "description", content: "Portfolio of Premansh Panigrahi — web design, branding, development, UI/UX, video, and the long road to medicine." },
       { name: "author", content: "Premansh Panigrahi" },
       { property: "og:site_name", content: "Premansh Panigrahi" },
       { property: "og:type", content: "website" },
