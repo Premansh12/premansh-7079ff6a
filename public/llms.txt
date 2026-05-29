@@ -1,0 +1,17 @@
+# Premansh Panigrahi
+
+> Portfolio of Premansh Panigrahi — web designer, branding expert, developer, video editor, UI/UX specialist, vibe coder, and future doctor.
+
+## Pages
+
+- [Home](/): Overview, about, certifications, featured work, and contact.
+- [Projects](/projects): Archive of selected case studies in design, branding, development, and direction.
+
+## Selected case studies
+
+- [Lumen Atelier](/projects/lumen-atelier): Identity and site for a Paris-based lighting studio.
+- [Nocturne FM](/projects/nocturne-fm): After-hours radio platform with live waveform rituals.
+- [Salt & Stone](/projects/salt-and-stone): Brand film for a coastal ceramics house.
+- [Vitals](/projects/vitals-dashboard): Clinical-grade dashboard for solo medical practices.
+- [Maison Noire](/projects/maison-noire): E-commerce flagship for a slow-fashion atelier.
+- [Kintsugi OS](/projects/kintsugi-os): Reflective journaling system for medical students.

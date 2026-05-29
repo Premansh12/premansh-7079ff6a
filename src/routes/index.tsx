@@ -8,10 +8,10 @@ import { projects } from "@/data/projects";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Premansh Panigrahi — Just making cool things with cool people." },
-      { name: "description", content: "Web designer, branding expert, developer, video editor, UI/UX specialist, vibe coder, future doctor." },
-      { property: "og:title", content: "Premansh Panigrahi — Portfolio" },
-      { property: "og:description", content: "Just making cool things with cool people." },
+      { title: "Premansh Panigrahi — Designer & Developer" },
+      { name: "description", content: "Portfolio of Premansh Panigrahi — web designer, branding expert, developer, video editor, UI/UX specialist, vibe coder, and future doctor." },
+      { property: "og:title", content: "Premansh Panigrahi — Designer & Developer" },
+      { property: "og:description", content: "Just making cool things with cool people — design, branding, development, and direction by Premansh Panigrahi." },
       { property: "og:url", content: "/" },
     ],
     links: [{ rel: "canonical", href: "/" }],
@@ -61,6 +61,7 @@ function Hero() {
           <Sparkles className="h-3 w-3 text-gold" /> Premansh Panigrahi
         </p>
         <h1 className="font-serif text-[clamp(2.75rem,8vw,8.5rem)] leading-[0.95] tracking-tight">
+          <span className="sr-only">Premansh Panigrahi — </span>
           Just making <em className="italic text-gold">cool</em> things
           <br />
           with cool people.
@@ -229,11 +230,12 @@ function Contact() {
         </div>
 
         <form onSubmit={onSubmit} className="space-y-6">
-          <Field label="Your name" name="name" required />
-          <Field label="Email" name="email" type="email" required />
+          <Field label="Your name" name="name" id="contact-name" required />
+          <Field label="Email" name="email" id="contact-email" type="email" required />
           <div>
-            <label className="mb-2 block text-xs uppercase tracking-[0.25em] text-background/60">Tell me about the project</label>
+            <label htmlFor="contact-message" className="mb-2 block text-xs uppercase tracking-[0.25em] text-background/60">Tell me about the project</label>
             <textarea
+              id="contact-message"
               name="message"
               required
               rows={5}
@@ -251,11 +253,12 @@ function Contact() {
   );
 }
 
-function Field({ label, name, type = "text", required }: { label: string; name: string; type?: string; required?: boolean }) {
+function Field({ label, name, id, type = "text", required }: { label: string; name: string; id: string; type?: string; required?: boolean }) {
   return (
     <div>
-      <label className="mb-2 block text-xs uppercase tracking-[0.25em] text-background/60">{label}</label>
+      <label htmlFor={id} className="mb-2 block text-xs uppercase tracking-[0.25em] text-background/60">{label}</label>
       <input
+        id={id}
         type={type}
         name={name}
         required={required}
