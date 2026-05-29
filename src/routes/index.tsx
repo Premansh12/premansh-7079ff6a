@@ -68,17 +68,17 @@ function Hero() {
 
       {/* Cinematic overlays: base darken, right-side readability gradient, vignette */}
       <div className="pointer-events-none absolute inset-0 bg-black/45" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-l from-black/85 via-black/40 to-black/10" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-black/10" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
 
       {/* Subtle golden ambient glow behind text */}
-      <div className="pointer-events-none absolute right-[5%] top-1/2 h-[60vh] w-[60vh] -translate-y-1/2 rounded-full bg-[#D4A54A]/10 blur-[120px]" />
+      <div className="pointer-events-none absolute left-[5%] top-1/2 h-[60vh] w-[60vh] -translate-y-1/2 rounded-full bg-[#D4A54A]/10 blur-[120px]" />
 
       {/* Faint dust particles */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-screen [background:radial-gradient(1px_1px_at_20%_30%,#fff,transparent_60%),radial-gradient(1px_1px_at_70%_60%,#fff,transparent_60%),radial-gradient(1.5px_1.5px_at_85%_20%,#D4A54A,transparent_60%),radial-gradient(1px_1px_at_40%_80%,#fff,transparent_60%),radial-gradient(1px_1px_at_55%_15%,#D4A54A,transparent_60%)]" />
 
       <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 px-6 pt-32 md:grid-cols-12 md:px-12 md:pt-0">
-        <div className="md:col-span-6 md:col-start-7 md:pl-6">
+        <div className="md:col-span-7 md:col-start-1 md:pr-6">
           <p className="mb-6 text-[11px] uppercase tracking-[0.45em] text-[#D4A54A] animate-[fadeUp_900ms_ease-out_300ms_both]">
             Premansh Panigrahi
           </p>
