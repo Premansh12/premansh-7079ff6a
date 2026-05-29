@@ -100,7 +100,7 @@ function ProjectPage() {
           <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">Gallery</p>
           <h2 className="mb-12 font-serif text-4xl md:text-5xl">Selected frames.</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            {project.gallery.map((src, i) => (
+            {project.gallery.map((src: string, i: number) => (
               <Reveal key={src} delay={i * 60}>
                 <button
                   type="button"
