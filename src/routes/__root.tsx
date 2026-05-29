@@ -65,8 +65,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "Premansh Panigrahi — Designer, Developer, Future Doctor" },
       { property: "og:description", content: "Portfolio of Premansh Panigrahi — web design, branding, development, UI/UX, video, and the long road to medicine." },
       { name: "twitter:description", content: "Portfolio of Premansh Panigrahi — web design, branding, development, UI/UX, video, and the long road to medicine." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7d1eb278-a13b-4d1f-a765-ad9fd195ac77/id-preview-c429a6c5--b5a59a88-77d0-4411-8270-f788af1c6294.lovable.app-1780078782566.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7d1eb278-a13b-4d1f-a765-ad9fd195ac77/id-preview-c429a6c5--b5a59a88-77d0-4411-8270-f788af1c6294.lovable.app-1780078782566.png" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/yAfZ4SvBm5gF213UZK47TKXuugv2/social-images/social-1780081523473-Portfolio.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/yAfZ4SvBm5gF213UZK47TKXuugv2/social-images/social-1780081523473-Portfolio.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
