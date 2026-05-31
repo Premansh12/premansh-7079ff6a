@@ -99,11 +99,12 @@ const CERTS: Cert[] = [
     downloadUrl: "#",
   },
   {
-    date: "2023 — 2028",
-    title: "MBBS — In Progress",
-    issuer: "AIIMS Bhubaneswar",
-    thumbnail: "https://placehold.co/600x400/0b0b0b/d4a843?text=AIIMS&font=playfair",
+    date: "Dec 2024 — Present",
+    title: "MBBS — Current Medical Student",
+    issuer: "IIMSAR, Haldia",
+    thumbnail: "https://placehold.co/600x400/0b0b0b/d4a843?text=IIMSAR&font=playfair",
   },
+
 ];
 
 function Index() {
