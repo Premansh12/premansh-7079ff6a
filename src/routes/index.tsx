@@ -336,6 +336,82 @@ function Skills() {
   );
 }
 
+// ------------------------------------------------------------
+// Tools & Technologies — branded icon cards grouped by domain.
+// ------------------------------------------------------------
+function Tools() {
+  return (
+    <section id="tools" className="px-6 py-32 md:px-12 md:py-48">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-16 flex flex-wrap items-end justify-between gap-8">
+          <div>
+            <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">Tools & Technologies</p>
+            <h2 className="font-serif text-5xl leading-[1] md:text-6xl">
+              The <em className="italic">kit</em>.
+            </h2>
+          </div>
+          <p className="max-w-sm text-muted-foreground">
+            A working set of software and crafts I reach for daily — design, code,
+            and the AI co-pilots that keep things moving.
+          </p>
+        </div>
+
+        <div className="space-y-16">
+          {TOOL_GROUPS.map((group, gi) => (
+            <Reveal key={group.label} delay={gi * 60}>
+              <div>
+                <div className="mb-6 flex items-center gap-4">
+                  <span className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
+                    {group.label}
+                  </span>
+                  <span className="h-px flex-1 bg-border" />
+                </div>
+                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                  {group.items.map((tool) => (
+                    <li
+                      key={tool.name}
+                      className="group relative flex flex-col items-center justify-center gap-3 overflow-hidden rounded-xl border border-border bg-background px-4 py-6 transition-all duration-500 hover:-translate-y-1 hover:border-gold/60 hover:shadow-[0_20px_50px_-30px_rgba(212,168,67,0.6)]"
+                    >
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-gold/0 via-gold/0 to-gold/0 opacity-0 transition-opacity duration-500 group-hover:from-gold/5 group-hover:to-gold/0 group-hover:opacity-100"
+                      />
+                      <div className="grid h-10 w-10 place-items-center">
+                        {tool.slug ? (
+                          <img
+                            src={`https://cdn.simpleicons.org/${tool.slug}/${tool.color ?? "333333"}`}
+                            alt={`${tool.name} logo`}
+                            loading="lazy"
+                            className="h-8 w-8 object-contain transition-transform duration-500 group-hover:scale-110"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                              const sib = (e.currentTarget.nextElementSibling as HTMLElement | null);
+                              if (sib) sib.style.display = "flex";
+                            }}
+                          />
+                        ) : null}
+                        <span
+                          className={`h-8 w-8 ${tool.slug ? "hidden" : "flex"} items-center justify-center rounded-md border border-gold/40 font-serif text-sm text-gold`}
+                        >
+                          {tool.name.charAt(0)}
+                        </span>
+                      </div>
+                      <span className="text-center text-xs font-medium tracking-wide text-foreground/80">
+                        {tool.name}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
 function FeaturedProjects() {
   const featured = projects.slice(0, 4);
   return (
