@@ -1,6 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowUpRight, ArrowDown, Send } from "lucide-react";
+import {
+  ArrowUpRight,
+  ArrowDown,
+  Send,
+  Award,
+  ExternalLink,
+  Download,
+} from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import heroPortrait from "@/assets/premansh-hero.png";
 import { projects } from "@/data/projects";
@@ -19,24 +26,84 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const ROLES = [
-  { k: "01", t: "Web Designer", d: "Pages composed like editorial spreads — every line of type and field of whitespace deliberate." },
-  { k: "02", t: "Branding Expert", d: "Identities built from a single, defensible idea. Wordmarks, tone, and a system that survives contact with the real world." },
-  { k: "03", t: "Website Developer", d: "Front-end engineering with a designer's hand. Performance budgets, accessibility, and motion that respects the content." },
-  { k: "04", t: "Video Editor", d: "Cuts that breathe. Color that flatters the material. Sound that does half the work." },
-  { k: "05", t: "Graphic Designer", d: "Posters, decks, print, social — the supporting cast that makes the headline performance possible." },
-  { k: "06", t: "UI/UX Specialist", d: "Products that earn the user's attention by spending it carefully. Research-led, opinionated, calm." },
-  { k: "07", t: "Vibe Coder", d: "Prototypes built at the speed of conversation. The right tool for the right hour of the night." },
-  { k: "08", t: "Future Doctor", d: "Currently in medical school. Bringing the discipline of clinical thinking back to everything I design." },
+// ------------------------------------------------------------
+// Skills — multidisciplinary identity rendered as floating
+// editorial cards rather than a flat list.
+// ------------------------------------------------------------
+type Skill = { t: string; d: string; tone: "primary" | "accent" | "ghost" };
+const SKILLS: Skill[] = [
+  { t: "Web Designer",      d: "Editorial layouts, considered type, deliberate whitespace.",           tone: "primary" },
+  { t: "Branding Expert",   d: "Identities built from a single defensible idea.",                       tone: "ghost"   },
+  { t: "Website Developer", d: "Front-end engineering with a designer's hand.",                         tone: "accent"  },
+  { t: "UI/UX Designer",    d: "Calm, opinionated products that earn attention by spending it well.",   tone: "primary" },
+  { t: "Graphic Designer",  d: "Posters, decks, print, social — the supporting cast.",                  tone: "ghost"   },
+  { t: "Video Editor",      d: "Cuts that breathe. Color that flatters. Sound that does half the work.", tone: "primary" },
+  { t: "Vibe Coder",        d: "Prototypes built at the speed of conversation.",                        tone: "accent"  },
+  { t: "Future Doctor",     d: "Currently in medical school — clinical thinking applied to design.",    tone: "ghost"   },
+  { t: "Hobbyist",          d: "Always with three side-projects in the kitchen.",                       tone: "primary" },
+  { t: "Tinkerer",          d: "Pulls things apart to see why they work.",                              tone: "accent"  },
+  { t: "Hobby Photographer",d: "Light, geometry, and the long quiet hours.",                            tone: "ghost"   },
 ];
 
-const CERTS = [
-  { issuer: "Google", title: "UX Design Professional Certificate", year: "2024" },
-  { issuer: "Meta", title: "Front-End Developer Specialization", year: "2024" },
-  { issuer: "Interaction Design Foundation", title: "Design Systems & Brand Identity", year: "2023" },
-  { issuer: "Adobe", title: "Certified Professional — Visual Design", year: "2023" },
-  { issuer: "freeCodeCamp", title: "Responsive Web Design & JS Algorithms", year: "2022" },
-  { issuer: "AIIMS Bhubaneswar", title: "MBBS — In Progress", year: "2023 — 2028" },
+// ------------------------------------------------------------
+// Certifications — chronological journey, rendered as a
+// vertical timeline. Date ↘ title ↘ issuer ↘ thumbnail ↘ CTAs.
+// ------------------------------------------------------------
+type Cert = {
+  date: string;
+  title: string;
+  issuer: string;
+  thumbnail: string;
+  viewUrl?: string;
+  downloadUrl?: string;
+};
+const CERTS: Cert[] = [
+  {
+    date: "2024",
+    title: "UX Design Professional Certificate",
+    issuer: "Google",
+    thumbnail: "https://placehold.co/600x400/1a1a1a/d4a843?text=Google+UX&font=playfair",
+    viewUrl: "#",
+    downloadUrl: "#",
+  },
+  {
+    date: "2024",
+    title: "Front-End Developer Specialization",
+    issuer: "Meta",
+    thumbnail: "https://placehold.co/600x400/0b0b0b/d4a843?text=Meta+FE&font=playfair",
+    viewUrl: "#",
+    downloadUrl: "#",
+  },
+  {
+    date: "2023",
+    title: "Design Systems & Brand Identity",
+    issuer: "Interaction Design Foundation",
+    thumbnail: "https://placehold.co/600x400/1f1a14/d4a843?text=IDF&font=playfair",
+    viewUrl: "#",
+    downloadUrl: "#",
+  },
+  {
+    date: "2023",
+    title: "Certified Professional — Visual Design",
+    issuer: "Adobe",
+    thumbnail: "https://placehold.co/600x400/120c0c/d4a843?text=Adobe&font=playfair",
+    viewUrl: "#",
+    downloadUrl: "#",
+  },
+  {
+    date: "2022",
+    title: "Responsive Web Design & JS Algorithms",
+    issuer: "freeCodeCamp",
+    thumbnail: "https://placehold.co/600x400/0c1612/d4a843?text=freeCodeCamp&font=playfair",
+    viewUrl: "#",
+    downloadUrl: "#",
+  },
+  {
+    date: "2023 — 2028",
+    title: "MBBS — In Progress",
+    issuer: "AIIMS Bhubaneswar",
+    thumbnail: "https://placehold.co/600x400/0b0b0b/d4a843?text=AIIMS&font=playfair",
+  },
 ];
 
 function Index() {
@@ -44,8 +111,9 @@ function Index() {
     <>
       <Hero />
       <About />
-      <Certifications />
+      <Skills />
       <FeaturedProjects />
+      <Certifications />
       <Contact />
     </>
   );
@@ -66,15 +134,11 @@ function Hero() {
         fetchPriority="high"
       />
 
-      {/* Cinematic overlays: base darken, right-side readability gradient, vignette */}
+      {/* Cinematic overlays */}
       <div className="pointer-events-none absolute inset-0 bg-black/45" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-black/10" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
-
-      {/* Subtle golden ambient glow behind text */}
       <div className="pointer-events-none absolute left-[5%] top-1/2 h-[60vh] w-[60vh] -translate-y-1/2 rounded-full bg-[#D4A54A]/10 blur-[120px]" />
-
-      {/* Faint dust particles */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-screen [background:radial-gradient(1px_1px_at_20%_30%,#fff,transparent_60%),radial-gradient(1px_1px_at_70%_60%,#fff,transparent_60%),radial-gradient(1.5px_1.5px_at_85%_20%,#D4A54A,transparent_60%),radial-gradient(1px_1px_at_40%_80%,#fff,transparent_60%),radial-gradient(1px_1px_at_55%_15%,#D4A54A,transparent_60%)]" />
 
       <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 px-6 pt-32 md:grid-cols-12 md:px-12 md:pt-0">
@@ -134,60 +198,82 @@ function About() {
         <div className="md:sticky md:top-32 self-start">
           <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">About</p>
           <h2 className="font-serif text-5xl leading-[1] md:text-6xl">
-            Eight crafts.
-            <br /> One <em className="italic">throughline</em>.
+            A practice between <em className="italic">crafts</em>.
           </h2>
-          <p className="mt-8 max-w-sm text-muted-foreground">
-            I move between disciplines on purpose. The work gets sharper when the
-            edges of one craft inform the centre of another.
-          </p>
         </div>
-        <ol className="space-y-12 md:space-y-16">
-          {ROLES.map((r, i) => (
-            <Reveal key={r.k} delay={i * 60}>
-              <li className="grid grid-cols-[auto_1fr] gap-6 border-t border-border pt-8">
-                <span className="font-serif text-2xl text-gold">{r.k}</span>
-                <div>
-                  <h3 className="font-serif text-3xl md:text-4xl">{r.t}</h3>
-                  <p className="mt-3 max-w-xl text-muted-foreground">{r.d}</p>
-                </div>
-              </li>
-            </Reveal>
-          ))}
-        </ol>
+        <div className="space-y-8 text-lg leading-relaxed text-muted-foreground">
+          <Reveal>
+            <p>
+              I'm Premansh — a designer, developer, and medical student building work
+              at the intersection of editorial restraint and modern engineering. I
+              move between disciplines on purpose; the work gets sharper when the
+              edges of one craft inform the centre of another.
+            </p>
+          </Reveal>
+          <Reveal delay={80}>
+            <p>
+              Most weeks I'm rotating through brand systems, product UI, motion,
+              and the occasional clinical rotation. The throughline is the same:
+              quiet on the outside, ambitious underneath.
+            </p>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
 }
 
-function Certifications() {
+// ------------------------------------------------------------
+// Skills section — floating editorial cards. Each tile has a
+// number, role, micro-description, and gold underline. Cards
+// rotate slightly on hover for a tactile, hand-laid feel.
+// ------------------------------------------------------------
+function Skills() {
   return (
-    <section id="certifications" className="bg-muted/40 px-6 py-32 md:px-12 md:py-48">
+    <section id="skills" className="bg-muted/40 px-6 py-32 md:px-12 md:py-48">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-16 flex items-end justify-between gap-8">
+        <div className="mb-16 flex flex-wrap items-end justify-between gap-8">
           <div>
-            <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">Credentials</p>
+            <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">Skills & Curiosities</p>
             <h2 className="font-serif text-5xl leading-[1] md:text-6xl">
-              Studied, certified, <em className="italic">curious</em>.
+              Eleven hats, <em className="italic">one wardrobe</em>.
             </h2>
           </div>
+          <p className="max-w-sm text-muted-foreground">
+            A loose taxonomy of the roles I keep cycling through — professional,
+            curious, and a little obsessive.
+          </p>
         </div>
-        <div className="grid gap-px bg-border md:grid-cols-2">
-          {CERTS.map((c, i) => (
-            <Reveal key={c.title} delay={i * 50}>
-              <article className="group relative flex h-full flex-col justify-between gap-8 bg-background p-8 md:p-12 transition-colors hover:bg-card">
-                <header className="flex items-start justify-between gap-6">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{c.issuer}</p>
-                    <h3 className="mt-3 font-serif text-2xl md:text-3xl">{c.title}</h3>
-                  </div>
-                  <span className="text-sm text-gold">{c.year}</span>
-                </header>
-                <div className="hairline" />
-              </article>
+
+        <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+          {SKILLS.map((s, i) => (
+            <Reveal key={s.t} delay={i * 40}>
+              <li
+                className={[
+                  "group relative flex h-full flex-col justify-between gap-8 overflow-hidden rounded-2xl border p-6 transition-all duration-500 md:p-8",
+                  "hover:-translate-y-1 hover:rotate-[-0.4deg] hover:shadow-[0_30px_80px_-40px_rgba(212,168,67,0.35)]",
+                  s.tone === "primary" && "border-border bg-background",
+                  s.tone === "accent" && "border-gold/30 bg-gold/[0.06]",
+                  s.tone === "ghost" && "border-border/50 bg-transparent",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <div className="flex items-start justify-between">
+                  <span className="font-serif text-sm text-gold">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-gold transition-transform duration-500 group-hover:scale-150" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-2xl leading-tight md:text-[1.6rem]">{s.t}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{s.d}</p>
+                  <span className="mt-5 block h-px w-8 bg-gold transition-all duration-500 group-hover:w-16" />
+                </div>
+              </li>
             </Reveal>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );
@@ -210,32 +296,146 @@ function FeaturedProjects() {
           </Link>
         </div>
 
-        <div className="grid gap-16 md:grid-cols-2 md:gap-20">
-          {featured.map((p, i) => (
-            <Reveal key={p.slug} delay={i * 80}>
-              <Link to="/projects/$slug" params={{ slug: p.slug }} className="group block">
-                <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                  <img
-                    src={p.cover}
-                    alt={p.title}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <span className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-background/90 text-foreground opacity-0 transition-opacity group-hover:opacity-100">
-                    <ArrowUpRight className="h-4 w-4" />
-                  </span>
-                </div>
-                <div className="mt-6 flex items-end justify-between gap-6">
-                  <div>
-                    <h3 className="font-serif text-3xl md:text-4xl">{p.title}</h3>
-                    <p className="mt-2 max-w-md text-muted-foreground">{p.tagline}</p>
+        {featured.length === 0 ? (
+          <div className="border-y border-border py-20 text-center md:py-28">
+            <p className="text-xs uppercase tracking-[0.4em] text-gold">In production</p>
+            <h3 className="mt-6 font-serif text-3xl md:text-4xl">
+              New case studies are being prepared.
+            </h3>
+            <p className="mx-auto mt-4 max-w-md text-muted-foreground">
+              Polished write-ups land here as they ship. Want an early look?
+            </p>
+            <a
+              href="#contact"
+              className="mt-8 inline-flex items-center gap-3 rounded-full border border-gold px-6 py-3 text-sm text-gold transition-colors hover:bg-gold hover:text-accent-foreground"
+            >
+              Get in touch <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </div>
+        ) : (
+          <div className="grid gap-16 md:grid-cols-2 md:gap-20">
+            {featured.map((p, i) => (
+              <Reveal key={p.slug} delay={i * 80}>
+                <Link to="/projects/$slug" params={{ slug: p.slug }} className="group block">
+                  <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                    <img
+                      src={p.cover}
+                      alt={p.title}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <span className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-background/90 text-foreground opacity-0 transition-opacity group-hover:opacity-100">
+                      <ArrowUpRight className="h-4 w-4" />
+                    </span>
                   </div>
-                  <span className="shrink-0 text-xs uppercase tracking-[0.3em] text-muted-foreground">{p.year}</span>
-                </div>
-              </Link>
-            </Reveal>
-          ))}
+                  <div className="mt-6 flex items-end justify-between gap-6">
+                    <div>
+                      <h3 className="font-serif text-3xl md:text-4xl">{p.title}</h3>
+                      <p className="mt-2 max-w-md text-muted-foreground">{p.tagline}</p>
+                    </div>
+                    <span className="shrink-0 text-xs uppercase tracking-[0.3em] text-muted-foreground">{p.year}</span>
+                  </div>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ------------------------------------------------------------
+// Certifications — vertical timeline. Center spine on desktop,
+// left rail on mobile. Each entry reveals on scroll with a
+// thumbnail, issuer, date, and view/download CTAs.
+// ------------------------------------------------------------
+function Certifications() {
+  return (
+    <section id="certifications" className="bg-muted/40 px-6 py-32 md:px-12 md:py-48">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-20 text-center">
+          <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">The Journey</p>
+          <h2 className="font-serif text-5xl leading-[1] md:text-6xl">
+            Studied, certified, <em className="italic">curious</em>.
+          </h2>
+          <p className="mx-auto mt-6 max-w-xl text-muted-foreground">
+            A chronological record of the courses, certifications, and ongoing
+            training that shape the work.
+          </p>
         </div>
+
+        <ol className="relative">
+          {/* Spine — left on mobile, center on desktop */}
+          <span
+            aria-hidden
+            className="absolute left-4 top-0 h-full w-px bg-gradient-to-b from-gold/0 via-gold/40 to-gold/0 md:left-1/2 md:-translate-x-1/2"
+          />
+          {CERTS.map((c, i) => {
+            const onRight = i % 2 === 1;
+            return (
+              <li key={c.title + i} className="relative pl-12 md:pl-0 md:pb-20">
+                {/* Node dot */}
+                <span
+                  aria-hidden
+                  className="absolute left-4 top-2 grid h-3 w-3 -translate-x-1/2 place-items-center rounded-full bg-gold shadow-[0_0_0_4px_hsl(var(--background))] md:left-1/2"
+                />
+                <div
+                  className={[
+                    "md:grid md:grid-cols-2 md:gap-12",
+                    onRight ? "md:[&>*:first-child]:col-start-2 md:[&>*:first-child]:pl-12" : "md:[&>*:first-child]:text-right md:[&>*:first-child]:pr-12",
+                  ].join(" ")}
+                >
+                  <Reveal delay={i * 60}>
+                    <article className="group rounded-2xl border border-border bg-background p-6 transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_25px_60px_-30px_rgba(212,168,67,0.4)] md:p-8">
+                      <div className={`flex items-center gap-3 ${onRight ? "" : "md:justify-end"}`}>
+                        <Award className="h-4 w-4 text-gold" />
+                        <span className="text-xs uppercase tracking-[0.3em] text-gold">{c.date}</span>
+                      </div>
+                      <h3 className="mt-4 font-serif text-2xl leading-tight md:text-3xl">{c.title}</h3>
+                      <p className="mt-2 text-sm uppercase tracking-[0.25em] text-muted-foreground">
+                        {c.issuer}
+                      </p>
+
+                      <div className="mt-6 overflow-hidden rounded-lg border border-border bg-muted/40">
+                        <img
+                          src={c.thumbnail}
+                          alt={`${c.title} certificate preview`}
+                          loading="lazy"
+                          className="h-40 w-full object-cover transition-transform duration-700 group-hover:scale-105 md:h-48"
+                        />
+                      </div>
+
+                      {(c.viewUrl || c.downloadUrl) && (
+                        <div className={`mt-6 flex flex-wrap gap-3 ${onRight ? "" : "md:justify-end"}`}>
+                          {c.viewUrl && (
+                            <a
+                              href={c.viewUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-xs uppercase tracking-[0.2em] text-foreground transition-colors hover:border-gold hover:text-gold"
+                            >
+                              View <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
+                          {c.downloadUrl && (
+                            <a
+                              href={c.downloadUrl}
+                              download
+                              className="inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-xs uppercase tracking-[0.2em] text-background transition-colors hover:bg-gold hover:text-accent-foreground"
+                            >
+                              Download <Download className="h-3 w-3" />
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </article>
+                  </Reveal>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
       </div>
     </section>
   );
