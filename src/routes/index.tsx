@@ -107,18 +107,74 @@ const CERTS: Cert[] = [
 
 ];
 
+// ------------------------------------------------------------
+// Tools & Technologies — categorised, brand-iconified grid.
+// Icons sourced from simpleicons.org CDN (no install needed).
+// Falls back gracefully if a slug is missing.
+// ------------------------------------------------------------
+type Tool = { name: string; slug?: string; color?: string };
+type ToolGroup = { label: string; items: Tool[] };
+const TOOL_GROUPS: ToolGroup[] = [
+  {
+    label: "Design",
+    items: [
+      { name: "Illustrator", slug: "adobeillustrator", color: "FF9A00" },
+      { name: "Photoshop", slug: "adobephotoshop", color: "31A8FF" },
+      { name: "InDesign", slug: "adobeindesign", color: "FF3366" },
+      { name: "After Effects", slug: "adobeaftereffects", color: "9999FF" },
+      { name: "Premiere Pro", slug: "adobepremierepro", color: "9999FF" },
+      { name: "Figma", slug: "figma", color: "F24E1E" },
+      { name: "Canva", slug: "canva", color: "00C4CC" },
+    ],
+  },
+  {
+    label: "Development",
+    items: [
+      { name: "HTML5", slug: "html5", color: "E34F26" },
+      { name: "CSS3", slug: "css3", color: "1572B6" },
+      { name: "Tailwind", slug: "tailwindcss", color: "06B6D4" },
+      { name: "JavaScript", slug: "javascript", color: "F7DF1E" },
+      { name: "Git", slug: "git", color: "F05032" },
+      { name: "GitHub", slug: "github", color: "181717" },
+      { name: "VS Code", slug: "visualstudiocode", color: "007ACC" },
+    ],
+  },
+  {
+    label: "AI & Productivity",
+    items: [
+      { name: "ChatGPT", slug: "openai", color: "412991" },
+      { name: "Claude", slug: "claude", color: "D97757" },
+      { name: "OpenRouter", slug: "openrouter", color: "6566F1" },
+      { name: "Lovable", slug: "lovable", color: "FF4D8D" },
+      { name: "Cursor", slug: "cursor", color: "000000" },
+      { name: "Notion", slug: "notion", color: "000000" },
+    ],
+  },
+  {
+    label: "Creative Practice",
+    items: [
+      { name: "Photography" },
+      { name: "Video Production" },
+      { name: "Branding Systems" },
+      { name: "UI/UX Design" },
+    ],
+  },
+];
+
 function Index() {
   return (
     <>
       <Hero />
       <About />
       <Skills />
+      <Tools />
       <FeaturedProjects />
       <Certifications />
       <Contact />
     </>
   );
 }
+
 
 function Hero() {
   return (
