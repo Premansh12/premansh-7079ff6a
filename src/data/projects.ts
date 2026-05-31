@@ -45,7 +45,7 @@ export const projects: Project[] = [
     title: "Mascara Skincare",
     category: "Brand Identity Design",
     year: "2024",
-    cover: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1800&q=80",
+    cover: "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/969f18198875963.66482933311e8.png",
     tagline: "A premium skincare identity built on restraint, elegance, and editorial clarity.",
     role: "Brand Designer · Visual Designer",
     stack: ["Adobe Photoshop", "Adobe Illustrator", "Figma"],
