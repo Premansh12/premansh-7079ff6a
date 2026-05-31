@@ -99,10 +99,65 @@ const CERTS: Cert[] = [
     downloadUrl: "#",
   },
   {
-    date: "2023 — 2028",
-    title: "MBBS — In Progress",
-    issuer: "AIIMS Bhubaneswar",
-    thumbnail: "https://placehold.co/600x400/0b0b0b/d4a843?text=AIIMS&font=playfair",
+    date: "Dec 2024 — Present",
+    title: "MBBS — Current Medical Student",
+    issuer: "IIMSAR, Haldia",
+    thumbnail: "https://placehold.co/600x400/0b0b0b/d4a843?text=IIMSAR&font=playfair",
+  },
+
+];
+
+// ------------------------------------------------------------
+// Tools & Technologies — categorised, brand-iconified grid.
+// Icons sourced from simpleicons.org CDN (no install needed).
+// Falls back gracefully if a slug is missing.
+// ------------------------------------------------------------
+type Tool = { name: string; slug?: string; color?: string };
+type ToolGroup = { label: string; items: Tool[] };
+const TOOL_GROUPS: ToolGroup[] = [
+  {
+    label: "Design",
+    items: [
+      { name: "Illustrator", slug: "adobeillustrator", color: "FF9A00" },
+      { name: "Photoshop", slug: "adobephotoshop", color: "31A8FF" },
+      { name: "InDesign", slug: "adobeindesign", color: "FF3366" },
+      { name: "After Effects", slug: "adobeaftereffects", color: "9999FF" },
+      { name: "Premiere Pro", slug: "adobepremierepro", color: "9999FF" },
+      { name: "Figma", slug: "figma", color: "F24E1E" },
+      { name: "Canva", slug: "canva", color: "00C4CC" },
+    ],
+  },
+  {
+    label: "Development",
+    items: [
+      { name: "HTML5", slug: "html5", color: "E34F26" },
+      { name: "CSS3", slug: "css3", color: "1572B6" },
+      { name: "Tailwind", slug: "tailwindcss", color: "06B6D4" },
+      { name: "JavaScript", slug: "javascript", color: "F7DF1E" },
+      { name: "Git", slug: "git", color: "F05032" },
+      { name: "GitHub", slug: "github", color: "181717" },
+      { name: "VS Code", slug: "visualstudiocode", color: "007ACC" },
+    ],
+  },
+  {
+    label: "AI & Productivity",
+    items: [
+      { name: "ChatGPT", slug: "openai", color: "412991" },
+      { name: "Claude", slug: "claude", color: "D97757" },
+      { name: "OpenRouter", slug: "openrouter", color: "6566F1" },
+      { name: "Lovable", slug: "lovable", color: "FF4D8D" },
+      { name: "Cursor", slug: "cursor", color: "000000" },
+      { name: "Notion", slug: "notion", color: "000000" },
+    ],
+  },
+  {
+    label: "Creative Practice",
+    items: [
+      { name: "Photography" },
+      { name: "Video Production" },
+      { name: "Branding Systems" },
+      { name: "UI/UX Design" },
+    ],
   },
 ];
 
@@ -112,12 +167,14 @@ function Index() {
       <Hero />
       <About />
       <Skills />
+      <Tools />
       <FeaturedProjects />
       <Certifications />
       <Contact />
     </>
   );
 }
+
 
 function Hero() {
   return (
@@ -278,6 +335,82 @@ function Skills() {
     </section>
   );
 }
+
+// ------------------------------------------------------------
+// Tools & Technologies — branded icon cards grouped by domain.
+// ------------------------------------------------------------
+function Tools() {
+  return (
+    <section id="tools" className="px-6 py-32 md:px-12 md:py-48">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-16 flex flex-wrap items-end justify-between gap-8">
+          <div>
+            <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">Tools & Technologies</p>
+            <h2 className="font-serif text-5xl leading-[1] md:text-6xl">
+              The <em className="italic">kit</em>.
+            </h2>
+          </div>
+          <p className="max-w-sm text-muted-foreground">
+            A working set of software and crafts I reach for daily — design, code,
+            and the AI co-pilots that keep things moving.
+          </p>
+        </div>
+
+        <div className="space-y-16">
+          {TOOL_GROUPS.map((group, gi) => (
+            <Reveal key={group.label} delay={gi * 60}>
+              <div>
+                <div className="mb-6 flex items-center gap-4">
+                  <span className="text-xs uppercase tracking-[0.35em] text-muted-foreground">
+                    {group.label}
+                  </span>
+                  <span className="h-px flex-1 bg-border" />
+                </div>
+                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                  {group.items.map((tool) => (
+                    <li
+                      key={tool.name}
+                      className="group relative flex flex-col items-center justify-center gap-3 overflow-hidden rounded-xl border border-border bg-background px-4 py-6 transition-all duration-500 hover:-translate-y-1 hover:border-gold/60 hover:shadow-[0_20px_50px_-30px_rgba(212,168,67,0.6)]"
+                    >
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-gold/0 via-gold/0 to-gold/0 opacity-0 transition-opacity duration-500 group-hover:from-gold/5 group-hover:to-gold/0 group-hover:opacity-100"
+                      />
+                      <div className="grid h-10 w-10 place-items-center">
+                        {tool.slug ? (
+                          <img
+                            src={`https://cdn.simpleicons.org/${tool.slug}/${tool.color ?? "333333"}`}
+                            alt={`${tool.name} logo`}
+                            loading="lazy"
+                            className="h-8 w-8 object-contain transition-transform duration-500 group-hover:scale-110"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                              const sib = (e.currentTarget.nextElementSibling as HTMLElement | null);
+                              if (sib) sib.style.display = "flex";
+                            }}
+                          />
+                        ) : null}
+                        <span
+                          className={`h-8 w-8 ${tool.slug ? "hidden" : "flex"} items-center justify-center rounded-md border border-gold/40 font-serif text-sm text-gold`}
+                        >
+                          {tool.name.charAt(0)}
+                        </span>
+                      </div>
+                      <span className="text-center text-xs font-medium tracking-wide text-foreground/80">
+                        {tool.name}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
 function FeaturedProjects() {
   const featured = projects.slice(0, 4);
