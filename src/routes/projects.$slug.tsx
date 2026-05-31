@@ -1,15 +1,43 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
-import { getAdjacentProjects, getProject } from "@/data/projects";
+import { ArrowLeft, ArrowRight, ArrowUpRight, ExternalLink } from "lucide-react";
+import {
+  getAdjacentProjects,
+  getProject,
+  getRelatedProjects,
+  type Project,
+} from "@/data/projects";
 import { Lightbox } from "@/components/lightbox";
 import { Reveal } from "@/components/reveal";
+
+// ============================================================
+// Reusable Project Detail Template
+// ------------------------------------------------------------
+// This route is data-driven. It reads a Project record from
+// `src/data/projects.ts` (which can be swapped for a Supabase
+// loader later) and renders a complete luxury case study with:
+//
+//   • Hero / cover image
+//   • Title, category, year meta
+//   • Overview, Challenge, Solution, Process
+//   • Gallery with lightbox
+//   • Tools & technologies
+//   • Key outcomes / results
+//   • Behance case study button
+//   • Previous / Next navigation
+//   • Related projects
+//
+// No content lives in this file — duplicate a record in
+// `projects` (or insert a row in your CMS) and the page is built.
+// ============================================================
 
 export const Route = createFileRoute("/projects/$slug")({
   loader: ({ params }) => {
     const project = getProject(params.slug);
     if (!project) throw notFound();
-    return { project };
+    const { prev, next } = getAdjacentProjects(params.slug);
+    const related = getRelatedProjects(params.slug, 3);
+    return { project, prev, next, related };
   },
   head: ({ params, loaderData }) => {
     const p = loaderData?.project;
@@ -49,8 +77,14 @@ export const Route = createFileRoute("/projects/$slug")({
   notFoundComponent: () => (
     <div className="grid min-h-screen place-items-center px-6 text-center">
       <div>
-        <h1 className="font-serif text-5xl">Project not found</h1>
-        <Link to="/projects" className="mt-6 inline-flex gold-link text-gold">Back to archive</Link>
+        <p className="text-xs uppercase tracking-[0.35em] text-gold">404</p>
+        <h1 className="mt-4 font-serif text-5xl">Project not found</h1>
+        <p className="mt-4 max-w-md text-muted-foreground">
+          This case study isn't published yet — or it has moved. Head back to the archive.
+        </p>
+        <Link to="/projects" className="mt-8 inline-flex gold-link text-gold">
+          Back to archive
+        </Link>
       </div>
     </div>
   ),
@@ -66,106 +100,214 @@ export const Route = createFileRoute("/projects/$slug")({
 });
 
 function ProjectPage() {
-  const { project } = Route.useLoaderData();
-  const { prev, next } = getAdjacentProjects(project.slug);
+  const { project, prev, next, related } = Route.useLoaderData();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const galleryUrls = project.gallery.map((g: { src: string }) => g.src);
 
   return (
     <article className="pt-32 md:pt-40">
-      {/* Hero */}
+      {/* ── Back link + Title block ───────────────────────────── */}
       <header className="px-6 md:px-12">
         <div className="mx-auto max-w-7xl">
-          <Link to="/projects" className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground hover:text-gold">
+          <Link
+            to="/projects"
+            className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground hover:text-gold"
+          >
             <ArrowLeft className="h-3 w-3" /> Archive
           </Link>
-          <h1 className="mt-10 font-serif text-[clamp(2.75rem,8vw,8rem)] leading-[0.95]">
-            {project.title}
-          </h1>
-          <p className="mt-6 max-w-2xl font-serif text-2xl text-muted-foreground md:text-3xl">
-            {project.tagline}
-          </p>
+
+          <Reveal>
+            <div className="mt-10 flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.35em] text-gold">
+              <span>{project.category}</span>
+              <span className="h-px w-8 bg-gold/40" />
+              <span className="text-muted-foreground">{project.year}</span>
+            </div>
+          </Reveal>
+
+          <Reveal delay={80}>
+            <h1 className="mt-6 font-serif text-[clamp(2.75rem,8vw,8rem)] leading-[0.95]">
+              {project.title}
+            </h1>
+          </Reveal>
+
+          <Reveal delay={140}>
+            <p className="mt-6 max-w-2xl font-serif text-2xl text-muted-foreground md:text-3xl">
+              {project.tagline}
+            </p>
+          </Reveal>
+
           <dl className="mt-16 grid grid-cols-2 gap-8 border-y border-border py-8 md:grid-cols-4">
             <Meta label="Role" value={project.role} />
             <Meta label="Year" value={project.year} />
-            <Meta label="Stack" value={project.stack.join(", ")} />
-            <Meta label="Status" value="Shipped" />
+            <Meta label="Category" value={project.category} />
+            <Meta label="Tools" value={project.stack.join(", ")} />
           </dl>
         </div>
       </header>
 
-      {/* Cover */}
+      {/* ── Cover ─────────────────────────────────────────────── */}
       <div className="mt-16 px-6 md:mt-24 md:px-12">
         <div className="mx-auto max-w-7xl overflow-hidden">
-          <img src={project.cover} alt={project.title} className="w-full" />
+          <Reveal>
+            <img
+              src={project.cover}
+              alt={project.title}
+              className="w-full"
+              loading="eager"
+            />
+          </Reveal>
         </div>
       </div>
 
-      {/* Body */}
+      {/* ── Overview ──────────────────────────────────────────── */}
       <div className="px-6 py-24 md:px-12 md:py-32">
         <div className="mx-auto grid max-w-7xl gap-16 md:grid-cols-[1fr_2fr] md:gap-24">
-          <h2 className="font-serif text-3xl md:text-4xl">Overview</h2>
-          <p className="text-lg leading-relaxed text-muted-foreground">{project.overview}</p>
+          <Reveal>
+            <h2 className="font-serif text-3xl md:text-4xl">Overview</h2>
+          </Reveal>
+          <Reveal delay={80}>
+            <p className="text-lg leading-relaxed text-muted-foreground">{project.overview}</p>
+          </Reveal>
         </div>
 
-        <Section title="The Problem" body={project.problem} />
-        <Section title="The Process" body={project.process} />
-        <Section title="The Outcome" body={project.outcome} />
+        <Section title="The Challenge" body={project.challenge} />
+        <Section title="The Solution" body={project.solution} />
+        <Section title="Design Process" body={project.process} />
       </div>
 
-      {/* Gallery */}
-      <div className="bg-muted/40 px-6 py-24 md:px-12 md:py-32">
-        <div className="mx-auto max-w-7xl">
-          <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">Gallery</p>
-          <h2 className="mb-12 font-serif text-4xl md:text-5xl">Selected frames.</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {project.gallery.map((src: string, i: number) => (
-              <Reveal key={src} delay={i * 60}>
-                <button
-                  type="button"
-                  onClick={() => setLightboxIndex(i)}
-                  aria-label={`View image ${i + 1} of ${project.title} in full size`}
-                  className="group block w-full overflow-hidden bg-background"
-                >
-                  <img
-                    src={src}
-                    alt={`${project.title} — ${i + 1}`}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                </button>
-              </Reveal>
-            ))}
+      {/* ── Gallery ───────────────────────────────────────────── */}
+      {galleryUrls.length > 0 && (
+        <div className="bg-muted/40 px-6 py-24 md:px-12 md:py-32">
+          <div className="mx-auto max-w-7xl">
+            <Reveal>
+              <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">Gallery</p>
+              <h2 className="mb-12 font-serif text-4xl md:text-5xl">Selected frames.</h2>
+            </Reveal>
+            <div className="grid gap-4 md:grid-cols-2">
+              {project.gallery.map((g: { src: string; alt?: string; caption?: string }, i: number) => (
+                <Reveal key={g.src + i} delay={i * 60}>
+                  <button
+                    type="button"
+                    onClick={() => setLightboxIndex(i)}
+                    aria-label={`View image ${i + 1} of ${project.title} in full size`}
+                    className="group block w-full overflow-hidden bg-background"
+                  >
+                    <img
+                      src={g.src}
+                      alt={g.alt ?? `${project.title} — ${i + 1}`}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    {g.caption && (
+                      <p className="mt-3 text-left text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                        {g.caption}
+                      </p>
+                    )}
+                  </button>
+                </Reveal>
+              ))}
+            </div>
           </div>
         </div>
+      )}
+
+      {/* ── Tools & Results ───────────────────────────────────── */}
+      <div className="px-6 py-24 md:px-12 md:py-32">
+        <div className="mx-auto grid max-w-7xl gap-16 md:grid-cols-2 md:gap-24">
+          {project.stack.length > 0 && (
+            <Reveal>
+              <p className="text-xs uppercase tracking-[0.35em] text-gold">Tools & Technologies</p>
+              <h3 className="mt-3 font-serif text-3xl md:text-4xl">The kit.</h3>
+              <ul className="mt-8 flex flex-wrap gap-3">
+                {project.stack.map((s: string) => (
+                  <li
+                    key={s}
+                    className="rounded-full border border-border px-4 py-2 text-sm text-foreground/80"
+                  >
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+          )}
+
+          {project.results.length > 0 && (
+            <Reveal delay={80}>
+              <p className="text-xs uppercase tracking-[0.35em] text-gold">Key Outcomes</p>
+              <h3 className="mt-3 font-serif text-3xl md:text-4xl">Results.</h3>
+              <ul className="mt-8 space-y-4">
+                {project.results.map((r: string, i: number) => (
+                  <li key={i} className="grid grid-cols-[auto_1fr] gap-5 border-t border-border pt-4">
+                    <span className="font-serif text-lg text-gold">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <p className="text-muted-foreground">{r}</p>
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+          )}
+        </div>
+
+        {project.behanceUrl && (
+          <div className="mx-auto mt-20 max-w-7xl text-center">
+            <a
+              href={project.behanceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-3 rounded-full bg-foreground px-7 py-3.5 text-sm text-background transition-all duration-300 hover:-translate-y-0.5 hover:bg-gold hover:text-accent-foreground"
+            >
+              View full case study on Behance
+              <ExternalLink className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </a>
+          </div>
+        )}
       </div>
 
-      {/* Pagination */}
-      <nav className="grid grid-cols-1 border-y border-border md:grid-cols-2">
-        {prev && (
-          <Link to="/projects/$slug" params={{ slug: prev.slug }} className="group flex flex-col gap-3 border-b border-border p-10 md:border-b-0 md:border-r md:p-16 hover:bg-muted/40">
-            <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
-              <ArrowLeft className="h-3 w-3" /> Previous
-            </span>
-            <span className="font-serif text-3xl group-hover:text-gold transition-colors">{prev.title}</span>
-          </Link>
-        )}
-        {next && (
-          <Link to="/projects/$slug" params={{ slug: next.slug }} className="group flex flex-col items-end gap-3 p-10 md:p-16 hover:bg-muted/40">
-            <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
-              Next <ArrowRight className="h-3 w-3" />
-            </span>
-            <span className="font-serif text-3xl group-hover:text-gold transition-colors">{next.title}</span>
-          </Link>
-        )}
-      </nav>
+      {/* ── Prev / Next ───────────────────────────────────────── */}
+      {(prev || next) && (
+        <nav className="grid grid-cols-1 border-y border-border md:grid-cols-2">
+          {prev && (
+            <Link
+              to="/projects/$slug"
+              params={{ slug: prev.slug }}
+              className="group flex flex-col gap-3 border-b border-border p-10 md:border-b-0 md:border-r md:p-16 hover:bg-muted/40"
+            >
+              <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                <ArrowLeft className="h-3 w-3" /> Previous
+              </span>
+              <span className="font-serif text-3xl transition-colors group-hover:text-gold">{prev.title}</span>
+            </Link>
+          )}
+          {next && (
+            <Link
+              to="/projects/$slug"
+              params={{ slug: next.slug }}
+              className="group flex flex-col items-end gap-3 p-10 md:p-16 hover:bg-muted/40"
+            >
+              <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                Next <ArrowRight className="h-3 w-3" />
+              </span>
+              <span className="font-serif text-3xl transition-colors group-hover:text-gold">{next.title}</span>
+            </Link>
+          )}
+        </nav>
+      )}
+
+      {/* ── Related ───────────────────────────────────────────── */}
+      {related.length > 0 && <RelatedProjects items={related} />}
 
       <div className="px-6 py-24 text-center md:px-12 md:py-32">
-        <a href="/#contact" className="inline-flex items-center gap-3 rounded-full border border-gold px-6 py-3 text-sm text-gold hover:bg-gold hover:text-accent-foreground transition-colors">
+        <a
+          href="/#contact"
+          className="inline-flex items-center gap-3 rounded-full border border-gold px-6 py-3 text-sm text-gold transition-colors hover:bg-gold hover:text-accent-foreground"
+        >
           Start a project together <ArrowUpRight className="h-4 w-4" />
         </a>
       </div>
 
       <Lightbox
-        images={project.gallery}
+        images={galleryUrls}
         index={lightboxIndex}
         onClose={() => setLightboxIndex(null)}
         onIndexChange={setLightboxIndex}
@@ -184,6 +326,7 @@ function Meta({ label, value }: { label: string; value: string }) {
 }
 
 function Section({ title, body }: { title: string; body: string }) {
+  if (!body) return null;
   return (
     <div className="mt-16 grid gap-16 md:mt-24 md:grid-cols-[1fr_2fr] md:gap-24">
       <Reveal>
@@ -193,5 +336,38 @@ function Section({ title, body }: { title: string; body: string }) {
         <p className="text-lg leading-relaxed text-muted-foreground">{body}</p>
       </Reveal>
     </div>
+  );
+}
+
+function RelatedProjects({ items }: { items: Project[] }) {
+  return (
+    <section className="bg-muted/30 px-6 py-24 md:px-12 md:py-32">
+      <div className="mx-auto max-w-7xl">
+        <Reveal>
+          <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">Keep exploring</p>
+          <h2 className="mb-12 font-serif text-4xl md:text-5xl">Related work.</h2>
+        </Reveal>
+        <div className="grid gap-10 md:grid-cols-3">
+          {items.map((p, i) => (
+            <Reveal key={p.slug} delay={i * 70}>
+              <Link to="/projects/$slug" params={{ slug: p.slug }} className="group block">
+                <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                  <img
+                    src={p.cover}
+                    alt={p.title}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </div>
+                <div className="mt-5">
+                  <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{p.category}</p>
+                  <h3 className="mt-2 font-serif text-2xl transition-colors group-hover:text-gold">{p.title}</h3>
+                </div>
+              </Link>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
