@@ -102,7 +102,7 @@ export const Route = createFileRoute("/projects/$slug")({
 function ProjectPage() {
   const { project, prev, next, related } = Route.useLoaderData();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const galleryUrls = project.gallery.map((g) => g.src);
+  const galleryUrls = project.gallery.map((g: { src: string }) => g.src);
 
   return (
     <article className="pt-32 md:pt-40">
@@ -184,7 +184,7 @@ function ProjectPage() {
               <h2 className="mb-12 font-serif text-4xl md:text-5xl">Selected frames.</h2>
             </Reveal>
             <div className="grid gap-4 md:grid-cols-2">
-              {project.gallery.map((g, i) => (
+              {project.gallery.map((g: { src: string; alt?: string; caption?: string }, i: number) => (
                 <Reveal key={g.src + i} delay={i * 60}>
                   <button
                     type="button"
@@ -219,7 +219,7 @@ function ProjectPage() {
               <p className="text-xs uppercase tracking-[0.35em] text-gold">Tools & Technologies</p>
               <h3 className="mt-3 font-serif text-3xl md:text-4xl">The kit.</h3>
               <ul className="mt-8 flex flex-wrap gap-3">
-                {project.stack.map((s) => (
+                {project.stack.map((s: string) => (
                   <li
                     key={s}
                     className="rounded-full border border-border px-4 py-2 text-sm text-foreground/80"
@@ -236,7 +236,7 @@ function ProjectPage() {
               <p className="text-xs uppercase tracking-[0.35em] text-gold">Key Outcomes</p>
               <h3 className="mt-3 font-serif text-3xl md:text-4xl">Results.</h3>
               <ul className="mt-8 space-y-4">
-                {project.results.map((r, i) => (
+                {project.results.map((r: string, i: number) => (
                   <li key={i} className="grid grid-cols-[auto_1fr] gap-5 border-t border-border pt-4">
                     <span className="font-serif text-lg text-gold">
                       {String(i + 1).padStart(2, "0")}
