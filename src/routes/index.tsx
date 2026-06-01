@@ -9,6 +9,8 @@ import {
   Download,
 } from "lucide-react";
 import { Reveal } from "@/components/reveal";
+import { SkillCard } from "@/components/skill-card";
+import { SKILL_ROLES } from "@/data/skill-roles";
 import heroPortrait from "@/assets/premansh-hero.png";
 import { projects } from "@/data/projects";
 
@@ -25,25 +27,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
-
-// ------------------------------------------------------------
-// Skills — multidisciplinary identity rendered as floating
-// editorial cards rather than a flat list.
-// ------------------------------------------------------------
-type Skill = { t: string; d: string; tone: "primary" | "accent" | "ghost" };
-const SKILLS: Skill[] = [
-  { t: "Web Designer",      d: "Editorial layouts, considered type, deliberate whitespace.",           tone: "primary" },
-  { t: "Branding Expert",   d: "Identities built from a single defensible idea.",                       tone: "ghost"   },
-  { t: "Website Developer", d: "Front-end engineering with a designer's hand.",                         tone: "accent"  },
-  { t: "UI/UX Designer",    d: "Calm, opinionated products that earn attention by spending it well.",   tone: "primary" },
-  { t: "Graphic Designer",  d: "Posters, decks, print, social — the supporting cast.",                  tone: "ghost"   },
-  { t: "Video Editor",      d: "Cuts that breathe. Color that flatters. Sound that does half the work.", tone: "primary" },
-  { t: "Vibe Coder",        d: "Prototypes built at the speed of conversation.",                        tone: "accent"  },
-  { t: "Future Doctor",     d: "Currently in medical school — clinical thinking applied to design.",    tone: "ghost"   },
-  { t: "Hobbyist",          d: "Always with three side-projects in the kitchen.",                       tone: "primary" },
-  { t: "Tinkerer",          d: "Pulls things apart to see why they work.",                              tone: "accent"  },
-  { t: "Hobby Photographer",d: "Light, geometry, and the long quiet hours.",                            tone: "ghost"   },
-];
 
 // ------------------------------------------------------------
 // Certifications — chronological journey, rendered as a
@@ -281,15 +264,16 @@ function About() {
 }
 
 // ------------------------------------------------------------
-// Skills section — floating editorial cards. Each tile has a
-// number, role, micro-description, and gold underline. Cards
-// rotate slightly on hover for a tactile, hand-laid feel.
+// Skills section — cinematic editorial role cards. Two-column
+// grid; each card click-expands an editorial detail layer
+// (expertise, tools, selected work, highlights).
 // ------------------------------------------------------------
 function Skills() {
+  const [openSlug, setOpenSlug] = useState<string | null>(null);
   return (
     <section id="skills" className="bg-muted/40 px-6 py-32 md:px-12 md:py-48">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-16 flex flex-wrap items-end justify-between gap-8">
+        <div className="mb-20 flex flex-wrap items-end justify-between gap-8">
           <div>
             <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">Skills & Curiosities</p>
             <h2 className="font-serif text-5xl leading-[1] md:text-6xl">
@@ -297,40 +281,23 @@ function Skills() {
             </h2>
           </div>
           <p className="max-w-sm text-muted-foreground">
-            A loose taxonomy of the roles I keep cycling through — professional,
-            curious, and a little obsessive.
+            A collection of visual identities — the roles I keep cycling
+            through. Open any card to step inside the practice.
           </p>
         </div>
 
-        <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
-          {SKILLS.map((s, i) => (
-            <Reveal key={s.t} delay={i * 40}>
-              <li
-                className={[
-                  "group relative flex h-full flex-col justify-between gap-8 overflow-hidden rounded-2xl border p-6 transition-all duration-500 md:p-8",
-                  "hover:-translate-y-1 hover:rotate-[-0.4deg] hover:shadow-[0_30px_80px_-40px_rgba(212,168,67,0.35)]",
-                  s.tone === "primary" && "border-border bg-background",
-                  s.tone === "accent" && "border-gold/30 bg-gold/[0.06]",
-                  s.tone === "ghost" && "border-border/50 bg-transparent",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                <div className="flex items-start justify-between">
-                  <span className="font-serif text-sm text-gold">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-gold transition-transform duration-500 group-hover:scale-150" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-2xl leading-tight md:text-[1.6rem]">{s.t}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{s.d}</p>
-                  <span className="mt-5 block h-px w-8 bg-gold transition-all duration-500 group-hover:w-16" />
-                </div>
-              </li>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
+          {SKILL_ROLES.map((role, i) => (
+            <Reveal key={role.slug} delay={i * 60}>
+              <SkillCard
+                role={role}
+                total={SKILL_ROLES.length}
+                expanded={openSlug === role.slug}
+                onToggle={() => setOpenSlug((cur) => (cur === role.slug ? null : role.slug))}
+              />
             </Reveal>
           ))}
-        </ul>
+        </div>
       </div>
     </section>
   );
