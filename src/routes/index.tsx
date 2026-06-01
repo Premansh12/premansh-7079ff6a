@@ -9,6 +9,8 @@ import {
   Download,
 } from "lucide-react";
 import { Reveal } from "@/components/reveal";
+import { SkillCard } from "@/components/skill-card";
+import { SKILL_ROLES } from "@/data/skill-roles";
 import heroPortrait from "@/assets/premansh-hero.png";
 import { projects } from "@/data/projects";
 
@@ -25,25 +27,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
-
-// ------------------------------------------------------------
-// Skills — multidisciplinary identity rendered as floating
-// editorial cards rather than a flat list.
-// ------------------------------------------------------------
-type Skill = { t: string; d: string; tone: "primary" | "accent" | "ghost" };
-const SKILLS: Skill[] = [
-  { t: "Web Designer",      d: "Editorial layouts, considered type, deliberate whitespace.",           tone: "primary" },
-  { t: "Branding Expert",   d: "Identities built from a single defensible idea.",                       tone: "ghost"   },
-  { t: "Website Developer", d: "Front-end engineering with a designer's hand.",                         tone: "accent"  },
-  { t: "UI/UX Designer",    d: "Calm, opinionated products that earn attention by spending it well.",   tone: "primary" },
-  { t: "Graphic Designer",  d: "Posters, decks, print, social — the supporting cast.",                  tone: "ghost"   },
-  { t: "Video Editor",      d: "Cuts that breathe. Color that flatters. Sound that does half the work.", tone: "primary" },
-  { t: "Vibe Coder",        d: "Prototypes built at the speed of conversation.",                        tone: "accent"  },
-  { t: "Future Doctor",     d: "Currently in medical school — clinical thinking applied to design.",    tone: "ghost"   },
-  { t: "Hobbyist",          d: "Always with three side-projects in the kitchen.",                       tone: "primary" },
-  { t: "Tinkerer",          d: "Pulls things apart to see why they work.",                              tone: "accent"  },
-  { t: "Hobby Photographer",d: "Light, geometry, and the long quiet hours.",                            tone: "ghost"   },
-];
 
 // ------------------------------------------------------------
 // Certifications — chronological journey, rendered as a
