@@ -1,68 +1,86 @@
-# Premansh Portfolio — Build Plan
+# Photography Journal — `/album` page
 
-A luxury, editorial portfolio built on the existing TanStack Start stack. Single-page scroll experience for the main site, with dedicated routes for each project case study.
+A new route showcasing photographs as an interactive expanding photo-strip, with each photo expanding into an immersive "journal chapter" view. Backed by Lovable Cloud (Supabase).
 
-## Design System
+## 1. Enable Lovable Cloud
 
-- **Palette** (in `src/styles.css` as oklch tokens):
-  - Background: crisp white `#ffffff` / dark mode: charcoal `#1a1a1a`
-  - Foreground / ink: charcoal `#333333`
-  - Accent (gold): `#d4a843`
-  - Muted surfaces for section transitions
-- **Typography**: Instrument Serif (display/headings) + Inter (body), loaded via Google Fonts in `__root.tsx` head links.
-- **Spacing**: generous whitespace, large section padding (min ~`py-32` on desktop), wide gutters.
-- **Micro-interactions**: gold underline grow on links, magnetic-ish button hovers, subtle card lifts.
+The project currently has no backend. Enable Lovable Cloud so we can store photo metadata and image URLs in a database (and host images via Storage).
 
-## Routes
+## 2. Database
+
+Create `photos` table (via migration):
 
 ```
-src/routes/
-  __root.tsx          → fonts, theme provider, fixed nav, preloader, back-to-top
-  index.tsx           → SPA scroll page: Hero, About, Certifications, Projects grid, Contact, Footer
-  projects.index.tsx  → full Projects hub grid
-  projects.$slug.tsx  → dedicated case study page with lightbox gallery
+photos
+├── id            uuid PK
+├── title         text
+├── image_url     text          (Supabase Storage public URL)
+├── location      text
+├── category      text
+├── story         text
+├── camera        text
+├── lens          text
+├── settings      text          (e.g. "f/2.8 · 1/500s · ISO 200")
+├── date_taken    date
+├── sort_order    int           (manual ordering)
+└── created_at    timestamptz
 ```
 
-Each route gets its own `head()` with title, description, og:title, og:description.
+- RLS enabled
+- Public read policy (`SELECT TO anon, authenticated USING (true)`) since this is portfolio content
+- `GRANT SELECT ... TO anon, authenticated`, `GRANT ALL ... TO service_role`
+- Storage bucket `photos` (public read) for image uploads
 
-## Sections (index.tsx)
+Seed with 5–6 starter rows using `picsum.photos` placeholder URLs so the page renders immediately. User can replace via Supabase later (or we add an admin uploader as a follow-up).
 
-1. **Hero** — full-viewport, Instrument Serif headline "Just making cool things with cool people." Animated canvas background (lightweight vanilla canvas: flowing gold particle field with parallax mouse offset). Name eyebrow + scroll cue.
-2. **About** — scroll-storytelling timeline. Sticky left column with name, right column reveals roles one-by-one as you scroll (web designer → branding → developer → video editor → graphic designer → UI/UX → vibe coder → future doctor). Fade/slide-up on intersection.
-3. **Certifications** — luxury cards in a restrained 2-column grid: issuer, credential, year, gold hairline accents.
-4. **Projects (preview)** — 3–4 featured case studies as large editorial cards, each linking to `/projects/$slug`. "View all" links to `/projects`.
-5. **Contact** — bold serif CTA, functional-looking form (name, email, message — local state, toast on submit), social links.
-6. **Footer** — single-line minimalist: © Premansh Panigrahi · socials.
+## 3. Route & data loading
 
-## Projects Detail Page
+- New file: `src/routes/album.tsx` → `/album`
+- Add "Album" link to `src/components/site-nav.tsx` between Projects and Certifications
+- Loader uses `createServerFn` + `supabaseAdmin` (public read) primed via `ensureQueryData`; component reads via `useSuspenseQuery`
+- `head()` with route-specific title/description/OG tags
+- `errorComponent` + `notFoundComponent`
 
-- Hero image, title, role, year, stack tags
-- Long-form deep-dive copy (problem → process → outcome)
-- Image gallery with click-to-open lightbox (custom dialog, no heavy lib)
-- Prev/next project navigation
-- Project data lives in a typed `src/data/projects.ts` array (4–6 case studies with realistic copy)
+## 4. Gallery component (`src/components/photo-strip.tsx`)
 
-## Interactive / Technical
+Desktop expanding photo-strip:
+- Horizontal flex row of full-height panels (`h-[80vh]`)
+- Each panel: `flex: 1` baseline; on hover, hovered panel gets `flex: 4`, siblings stay `flex: 1` → smooth CSS transition (`transition-[flex] duration-700 ease-[cubic-bezier(.2,.7,.2,1)]`)
+- Background-image cover, gold hairline dividers
+- Bottom-left overlay info (title / location / category), hidden by default; on expanded panel, fades + slides up with staggered delays (title 0ms, location 120ms, category 240ms)
+- Dark gradient overlay for legibility
 
-- **Preloader**: brief overlay with logo wordmark, fades on mount
-- **Smooth scroll**: CSS `scroll-behavior: smooth` + offset for fixed nav
-- **Parallax**: hero canvas + subtle background layer translation on scroll
-- **Scroll reveals**: small `useInView` IntersectionObserver hook → fade/slide
-- **Mobile nav**: full-screen overlay hamburger menu
-- **Theme toggle**: light (white/charcoal/gold) ↔ dark (charcoal/white/gold), persisted to localStorage, no-flash inline script in root shell
-- **Back-to-top**: appears after scroll past hero
-- **Images**: `picsum.photos` seeded URLs for cinematic placeholders
-- **Icons**: lucide-react (already common in stack)
+Mobile (`<md`):
+- Stack vertically; tap-to-expand state (first tap expands + reveals info; second tap opens detail)
+- Tracked via `useState<number | null>(activeIndex)`
 
-## SEO
+Click on a panel → sets `selectedId` (URL search param `?photo=<id>`) which scrolls the page to / mounts the Journal Chapter section below the strip.
 
-Per-route `head()` with title, description, og tags. Root sets sitewide defaults + Organization JSON-LD. Canonical only on leaves.
+## 5. Journal Chapter (immersive detail view)
 
-## Technical Notes
+`src/components/photo-chapter.tsx`, rendered inline on the same page (not a modal):
+- Large hero image (`h-[90vh]`, object-cover)
+- Editorial layout below: serif title, location · date, story prose column, right-side technical sidebar (camera / lens / settings / category) with gold hairlines
+- Entrance animation: image fades + scales from 1.04, text reveals via existing `Reveal` component
+- Smooth scroll into view on selection; "Close chapter" button clears the param
 
-- Pure frontend; no backend, no Lovable Cloud needed.
-- Canvas animation kept under ~60 particles with `requestAnimationFrame` + visibility pause for performance.
-- All colors via semantic Tailwind tokens (`bg-background`, `text-foreground`, `text-accent`), no hardcoded hex in components.
-- Fully responsive: mobile-first, tested at sm/md/lg breakpoints.
+State synced to URL so chapters are linkable.
+
+## 6. Styling
+
+Reuses existing tokens — Instrument Serif headings, charcoal text, gold accents, white background. No new color tokens needed. Adds one keyframe (`chapterIn`) to `styles.css` for the chapter reveal.
+
+## 7. Out of scope (can be added later)
+
+- Admin upload UI (for now, photos managed directly in Supabase dashboard or via SQL)
+- Lightbox keyboard nav across all photos
+- Image optimization / responsive `srcset`
+
+## Technical notes
+
+- Server fn returns plain DTOs (Date → ISO string) for SSR safety
+- Public read via server fn + `supabaseAdmin` (loader runs during SSR with no bearer token; do not use `requireSupabaseAuth` on a public route)
+- Mobile state managed locally; desktop uses pure CSS hover for performance
+- No new heavy dependencies — pure Tailwind transitions
 
 Ready to build on approval.
