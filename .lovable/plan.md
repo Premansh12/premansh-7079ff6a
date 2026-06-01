@@ -1,86 +1,99 @@
-# Photography Journal — `/album` page
+## Goal
 
-A new route showcasing photographs as an interactive expanding photo-strip, with each photo expanding into an immersive "journal chapter" view. Backed by Lovable Cloud (Supabase).
+Replace the current 4-column minimalist Skills grid in `src/routes/index.tsx` with a 2-column editorial showcase of 11 large "visual identity" cards — one per role. Imagery is the hero; each card expands on click to reveal a richer layer (expertise, tools, selected work, highlights). Aesthetic, palette, and typography stay locked.
 
-## 1. Enable Lovable Cloud
+## What ships
 
-The project currently has no backend. Enable Lovable Cloud so we can store photo metadata and image URLs in a database (and host images via Storage).
+### 1. Visuals — 11 AI-generated cinematic illustrations
 
-## 2. Database
+Generated with `imagegen--generate_image` at `premium` quality, saved to `src/assets/skills/`, imported as ES modules. Each image is a luxury-magazine still life (Aesop / Monocle / Apple product photo register) — soft dramatic studio lighting, off-white backdrop, depth, shadows, no people, no text, no UI chrome that would clash with the page. Same aspect (4:5 portrait, 1024×1280) and consistent palette (warm neutrals + a single gold/charcoal note) so all 11 read as one set.
 
-Create `photos` table (via migration):
+Per-role direction (one image each):
+- **Web Designer** — open hardcover editorial magazine spread, gridded type specimen on left page, vellum overlay
+- **Branding Expert** — stacked monogrammed brand book, embossed paper swatch, brass clip
+- **Website Developer** — frosted glass panel etched with monospaced code fragment, brushed brass edge
+- **UI/UX Designer** — matte black tablet leaning on linen, single product screen, ceramic stylus
+- **Graphic Designer** — folded silkscreen poster, ink roller, type specimen card
+- **Video Editor** — vintage 16mm film reel, color grading swatch strip, lens
+- **Vibe Coder** — translucent acrylic terminal block, generative wireframe inside, soft gold caustics
+- **Future Doctor** — leather-bound clinical notebook, antique stethoscope, pressed botanical
+- **Hobbyist** — workbench corner, half-finished wooden model, tools laid in a row
+- **Tinkerer** — opened mechanical watch movement, jeweler's loupe, brass tweezers
+- **Hobby Photographer** — vintage rangefinder camera, contact sheet, film canister
 
+### 2. Layout — editorial role cards
+
+Replaces the existing `Skills` component. 2-column responsive grid (1-col on mobile, 2-col from `md`), generous gaps, each card large enough to feel like a magazine plate.
+
+Per card structure:
+```text
+┌──────────────────────────┬──────────────────────────┐
+│  01 / Eleven             │                          │
+│                          │   [cinematic image]      │
+│  Web Designer            │                          │
+│  Editorial layouts,      │                          │
+│  considered type…        │                          │
+│                          │                          │
+│  Explore  →              │                          │
+└──────────────────────────┴──────────────────────────┘
 ```
-photos
-├── id            uuid PK
-├── title         text
-├── image_url     text          (Supabase Storage public URL)
-├── location      text
-├── category      text
-├── story         text
-├── camera        text
-├── lens          text
-├── settings      text          (e.g. "f/2.8 · 1/500s · ISO 200")
-├── date_taken    date
-├── sort_order    int           (manual ordering)
-└── created_at    timestamptz
-```
+- Left: role number (`01/11`), serif title (Instrument Serif, large), short description (kept from current copy), gold "Explore" affordance.
+- Right: full-bleed image, charcoal hairline border, subtle gold glow on hover.
+- Hover: card lifts (`-translate-y-1`), image scales `1.04` with eased transition, gold ring fades in, soft drop shadow. Cursor-reactive lighting via a single radial gradient pinned to pointer coords (lightweight `onMouseMove`, no library).
 
-- RLS enabled
-- Public read policy (`SELECT TO anon, authenticated USING (true)`) since this is portfolio content
-- `GRANT SELECT ... TO anon, authenticated`, `GRANT ALL ... TO service_role`
-- Storage bucket `photos` (public read) for image uploads
+### 3. Click-to-expand layer
 
-Seed with 5–6 starter rows using `picsum.photos` placeholder URLs so the page renders immediately. User can replace via Supabase later (or we add an admin uploader as a follow-up).
+Clicking a card animates an expanded panel inline beneath that card (full grid-row width) revealing four sections, separated by gold hairlines:
+- **Areas of expertise** — 3–5 bullets
+- **Tools & technologies** — chip row (reuses tokens from existing Tools section)
+- **Selected work** — 1–3 entries, linked to existing `/projects/$slug` where relevant (e.g. Branding Expert → Mascara Skincare)
+- **Highlights** — 2–3 short statements
 
-## 3. Route & data loading
+Only one card open at a time (`useState<string | null>`). Expansion uses height-auto + opacity transition; the trigger card itself stays visible.
 
-- New file: `src/routes/album.tsx` → `/album`
-- Add "Album" link to `src/components/site-nav.tsx` between Projects and Certifications
-- Loader uses `createServerFn` + `supabaseAdmin` (public read) primed via `ensureQueryData`; component reads via `useSuspenseQuery`
-- `head()` with route-specific title/description/OG tags
-- `errorComponent` + `notFoundComponent`
+### 4. Content — defaults written from existing portfolio context
 
-## 4. Gallery component (`src/components/photo-strip.tsx`)
+Eleven role records drafted from the portfolio's existing voice (About copy, Tools section, projects). Examples:
+- *Branding Expert* → expertise: identity systems, packaging, type specimens; tools: Illustrator, InDesign, Figma; selected work: Mascara Skincare; highlights: "Concept-first identities", "Editorial restraint as a brand voice".
+- *Future Doctor* → expertise: clinical reasoning, anatomy, evidence-based thinking; tools: Notion, research notebooks; highlights: "Currently MBBS, IIMSAR Haldia (Dec 2024 — present)".
 
-Desktop expanding photo-strip:
-- Horizontal flex row of full-height panels (`h-[80vh]`)
-- Each panel: `flex: 1` baseline; on hover, hovered panel gets `flex: 4`, siblings stay `flex: 1` → smooth CSS transition (`transition-[flex] duration-700 ease-[cubic-bezier(.2,.7,.2,1)]`)
-- Background-image cover, gold hairline dividers
-- Bottom-left overlay info (title / location / category), hidden by default; on expanded panel, fades + slides up with staggered delays (title 0ms, location 120ms, category 240ms)
-- Dark gradient overlay for legibility
+All content lives in a single typed array (`SKILL_ROLES`) in `src/data/skill-roles.ts` shaped to mirror a future Supabase table — see Technical notes.
 
-Mobile (`<md`):
-- Stack vertically; tap-to-expand state (first tap expands + reveals info; second tap opens detail)
-- Tracked via `useState<number | null>(activeIndex)`
+### 5. Visual consistency
 
-Click on a panel → sets `selectedId` (URL search param `?photo=<id>`) which scrolls the page to / mounts the Journal Chapter section below the strip.
+Reuses existing `--gold`, `--foreground` (charcoal), `font-serif` Instrument Serif, `Reveal` component, `hairline` utility. No new color tokens. Section background stays `bg-muted/40` to match current page rhythm.
 
-## 5. Journal Chapter (immersive detail view)
+## Out of scope
 
-`src/components/photo-chapter.tsx`, rendered inline on the same page (not a modal):
-- Large hero image (`h-[90vh]`, object-cover)
-- Editorial layout below: serif title, location · date, story prose column, right-side technical sidebar (camera / lens / settings / category) with gold hairlines
-- Entrance animation: image fades + scales from 1.04, text reveals via existing `Reveal` component
-- Smooth scroll into view on selection; "Close chapter" button clears the param
-
-State synced to URL so chapters are linkable.
-
-## 6. Styling
-
-Reuses existing tokens — Instrument Serif headings, charcoal text, gold accents, white background. No new color tokens needed. Adds one keyframe (`chapterIn`) to `styles.css` for the chapter reveal.
-
-## 7. Out of scope (can be added later)
-
-- Admin upload UI (for now, photos managed directly in Supabase dashboard or via SQL)
-- Lightbox keyboard nav across all photos
-- Image optimization / responsive `srcset`
+- Supabase table + migration for skill roles (data file is shaped for it; migration in a later pass)
+- Per-role pages or routing
+- Replacing the Tools section (it sits below Skills and stays as-is)
+- Touching any other section
 
 ## Technical notes
 
-- Server fn returns plain DTOs (Date → ISO string) for SSR safety
-- Public read via server fn + `supabaseAdmin` (loader runs during SSR with no bearer token; do not use `requireSupabaseAuth` on a public route)
-- Mobile state managed locally; desktop uses pure CSS hover for performance
-- No new heavy dependencies — pure Tailwind transitions
+**Data shape** (`src/data/skill-roles.ts`) — designed so a Supabase table swap is a one-file change later:
+```ts
+export type SkillRole = {
+  slug: string;            // 'web-designer'
+  index: number;           // 1..11
+  title: string;
+  tagline: string;         // short card description
+  image: string;           // imported asset URL
+  expertise: string[];
+  tools: string[];
+  selectedWork: { label: string; href?: string }[];
+  highlights: string[];
+};
+```
+The future Supabase table would mirror this 1:1 (`skill_roles` with the array fields as `jsonb`), letting a server fn return the same DTO with no component changes.
 
-Ready to build on approval.
+**Files**:
+- `src/data/skill-roles.ts` — new, 11 typed records
+- `src/assets/skills/*.jpg` — 11 generated images (premium quality, 1024×1280)
+- `src/components/skill-card.tsx` — new card + expand panel + pointer-light hook
+- `src/routes/index.tsx` — replace existing `Skills` component (and its `SKILLS` array) with the new one; remove the now-unused `Skill` type
+
+**Performance**: images set `loading="lazy"` except the first 2; same `Reveal` staggering already used elsewhere.
+
+**Animations**: pure Tailwind + CSS transitions; no new dependencies.
