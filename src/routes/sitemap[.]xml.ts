@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
-import { projects } from "@/data/projects";
+import { listProjects } from "@/lib/projects.functions";
 
 // TODO: replace with your project URL once a project name or custom domain is set.
 const BASE_URL = "";
@@ -15,14 +15,22 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const entries: SitemapEntry[] = [
-          { path: "/", changefreq: "weekly", priority: "1.0" },
-          { path: "/projects", changefreq: "weekly", priority: "0.9" },
-          ...projects.map((p) => ({
+        let projectEntries: SitemapEntry[] = [];
+        try {
+          const projects = await listProjects();
+          projectEntries = projects.map((p) => ({
             path: `/projects/${p.slug}`,
             changefreq: "monthly" as const,
             priority: "0.7",
-          })),
+          }));
+        } catch (err) {
+          console.error("sitemap: failed to load projects", err);
+        }
+
+        const entries: SitemapEntry[] = [
+          { path: "/", changefreq: "weekly", priority: "1.0" },
+          { path: "/projects", changefreq: "weekly", priority: "0.9" },
+          ...projectEntries,
         ];
 
         const urls = entries.map((e) =>
