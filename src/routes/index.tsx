@@ -470,67 +470,130 @@ function Certifications() {
 }
 
 function Contact() {
-  const [sent, setSent] = useState(false);
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSent(true);
-    (e.currentTarget as HTMLFormElement).reset();
-    setTimeout(() => setSent(false), 4000);
-  };
   return (
-    <section id="contact" className="bg-foreground px-6 py-32 text-background md:px-12 md:py-48">
-      <div className="mx-auto grid max-w-7xl gap-16 md:grid-cols-[1.2fr_1fr] md:gap-24">
-        <div>
-          <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">Contact</p>
-          <h2 className="font-serif text-[clamp(2.5rem,6vw,5.5rem)] leading-[0.95]">
-            Have an idea
-            <br /> worth <em className="italic text-gold">obsessing</em> over?
+    <section
+      id="contact"
+      className="relative overflow-hidden bg-foreground px-6 py-32 text-background md:px-12 md:py-48"
+    >
+      {/* subtle gold ambient */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-32 top-1/3 h-[420px] w-[420px] rounded-full bg-gold/10 blur-3xl"
+      />
+      <div className="relative mx-auto max-w-6xl">
+        <Reveal>
+          <p className="mb-6 text-xs uppercase tracking-[0.4em] text-gold">— Contact</p>
+        </Reveal>
+        <Reveal delay={100}>
+          <h2 className="font-serif text-[clamp(2.75rem,7vw,6.5rem)] leading-[0.95] tracking-tight">
+            Let's Build Something
+            <br />
+            <em className="italic text-gold">Together</em>.
           </h2>
-          <p className="mt-8 max-w-md text-background/70">
-            I take on a small, deliberate number of projects each year. If yours
-            sounds like one of them, write to me — I read every message.
+        </Reveal>
+        <Reveal delay={200}>
+          <p className="mt-10 max-w-2xl text-base text-background/70 md:text-lg">
+            Whether it's design, branding, product experiences, creative
+            experiments, research, or ambitious ideas — I'm always open to
+            meaningful conversations and interesting collaborations.
           </p>
-          <div className="mt-10 space-y-2 text-sm">
-            <a href="mailto:hello@premansh.dev" className="block gold-link">hello@premansh.dev</a>
-            <p className="text-background/60">Jagdalpur / Remote · Available Q3 onward</p>
-          </div>
-        </div>
+        </Reveal>
 
-        <form onSubmit={onSubmit} className="space-y-6">
-          <Field label="Your name" name="name" id="contact-name" required />
-          <Field label="Email" name="email" id="contact-email" type="email" required />
-          <div>
-            <label htmlFor="contact-message" className="mb-2 block text-xs uppercase tracking-[0.25em] text-background/60">Tell me about the project</label>
-            <textarea
-              id="contact-message"
-              name="message"
-              required
-              rows={5}
-              className="w-full resize-none border-b border-background/20 bg-transparent py-2 text-background placeholder:text-background/30 focus:border-gold focus:outline-none"
-              placeholder="What are we making?"
-            />
+        {/* Availability */}
+        <Reveal delay={300}>
+          <div className="mt-20 border-t border-background/10 pt-12">
+            <p className="text-[10px] uppercase tracking-[0.4em] text-background/50">
+              Currently Open For
+            </p>
+            <ul className="mt-6 flex flex-wrap gap-3">
+              {AVAILABILITY.map((item) => (
+                <li
+                  key={item}
+                  className="rounded-full border border-gold/40 px-4 py-2 text-xs uppercase tracking-[0.18em] text-background/85 transition-colors hover:border-gold hover:bg-gold/10 hover:text-gold"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
-          <button type="submit" className="group inline-flex items-center gap-3 rounded-full bg-gold px-6 py-3 text-sm text-accent-foreground transition-transform hover:-translate-y-0.5">
-            {sent ? "Message sent ✓" : "Send message"}
-            <Send className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </button>
-        </form>
+        </Reveal>
+
+        {/* Social directory + email CTA */}
+        <div className="mt-20 grid gap-16 border-t border-background/10 pt-12 md:grid-cols-[1.1fr_1fr] md:gap-20">
+          <Reveal delay={350}>
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.4em] text-background/50">
+                Find Me Elsewhere
+              </p>
+              <ul className="mt-8 divide-y divide-background/10">
+                {SOCIALS.map((s) => {
+                  const Icon = SOCIAL_ICONS[s.key];
+                  return (
+                    <li key={s.key}>
+                      <a
+                        href={s.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group flex items-center justify-between gap-6 py-5 transition-colors hover:text-gold"
+                      >
+                        <span className="flex items-center gap-4">
+                          <Icon className="h-4 w-4 text-gold" />
+                          <span className="font-serif text-2xl md:text-3xl">{s.label}</span>
+                        </span>
+                        <span className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-background/50 transition-colors group-hover:text-gold">
+                          {s.handle}
+                          <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                        </span>
+                      </a>
+                    </li>
+                  );
+                })}
+                <li>
+                  <a
+                    href={MAILTO}
+                    className="group flex items-center justify-between gap-6 py-5 transition-colors hover:text-gold"
+                  >
+                    <span className="flex items-center gap-4">
+                      <Mail className="h-4 w-4 text-gold" />
+                      <span className="font-serif text-2xl md:text-3xl">Email</span>
+                    </span>
+                    <span className="flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-background/50 transition-colors group-hover:text-gold">
+                      {EMAIL}
+                      <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    </span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </Reveal>
+
+          <Reveal delay={420}>
+            <div className="flex h-full flex-col justify-between gap-12">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.4em] text-background/50">
+                  Write to me
+                </p>
+                <p className="mt-6 font-serif text-3xl leading-tight md:text-4xl">
+                  I read every message — and reply to the ones worth obsessing over.
+                </p>
+              </div>
+              <div>
+                <a
+                  href={MAILTO}
+                  className="group inline-flex items-center gap-4 rounded-full bg-gold px-7 py-4 text-sm uppercase tracking-[0.2em] text-accent-foreground transition-transform hover:-translate-y-0.5"
+                >
+                  {EMAIL}
+                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </a>
+                <p className="mt-6 text-xs uppercase tracking-[0.3em] text-background/50">
+                  {LOCATION_CONTACT}
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
 }
 
-function Field({ label, name, id, type = "text", required }: { label: string; name: string; id: string; type?: string; required?: boolean }) {
-  return (
-    <div>
-      <label htmlFor={id} className="mb-2 block text-xs uppercase tracking-[0.25em] text-background/60">{label}</label>
-      <input
-        id={id}
-        type={type}
-        name={name}
-        required={required}
-        className="w-full border-b border-background/20 bg-transparent py-2 text-background placeholder:text-background/30 focus:border-gold focus:outline-none"
-      />
-    </div>
-  );
-}
