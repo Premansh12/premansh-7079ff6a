@@ -94,7 +94,7 @@ export function Preloader() {
         className="absolute inset-0 bg-white"
         style={{
           opacity: veilOpacity,
-          transition: `opacity 700ms ${ease}`,
+          transition: `opacity 500ms ${ease}`,
         }}
       />
 
@@ -103,7 +103,7 @@ export function Preloader() {
         <div
           style={{
             ...maskStyle,
-            transition: `width 850ms ${ease}, height 850ms ${ease}, clip-path 750ms ${ease}, opacity 500ms ${ease}`,
+            transition: `width 600ms ${ease}, height 600ms ${ease}, clip-path 550ms ${ease}, opacity 400ms ${ease}`,
             willChange: "width, height, clip-path, opacity",
           }}
         >
