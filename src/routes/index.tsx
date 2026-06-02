@@ -269,7 +269,8 @@ function About() {
 // (expertise, tools, selected work, highlights).
 // ------------------------------------------------------------
 function Skills() {
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const activeRole = SKILL_ROLES.find((r) => r.slug === activeSlug) ?? null;
   return (
     <section id="skills" className="bg-muted/40 px-6 py-32 md:px-12 md:py-48">
       <div className="mx-auto max-w-7xl">
@@ -286,22 +287,29 @@ function Skills() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {SKILL_ROLES.map((role, i) => (
-            <Reveal key={role.slug} delay={i * 60}>
+            <Reveal key={role.slug} delay={i * 50}>
               <SkillCard
                 role={role}
                 total={SKILL_ROLES.length}
-                expanded={openSlug === role.slug}
-                onToggle={() => setOpenSlug((cur) => (cur === role.slug ? null : role.slug))}
+                onOpen={() => setActiveSlug(role.slug)}
               />
             </Reveal>
           ))}
         </div>
+
+        <SkillPanel
+          role={activeRole}
+          total={SKILL_ROLES.length}
+          open={!!activeSlug}
+          onOpenChange={(o) => !o && setActiveSlug(null)}
+        />
       </div>
     </section>
   );
 }
+
 
 // ------------------------------------------------------------
 // Tools & Technologies — branded icon cards grouped by domain.
