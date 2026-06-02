@@ -20,32 +20,39 @@ export function Preloader() {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (reduced) {
+      document.body.classList.remove("preloading");
       setStage(5);
       const t = setTimeout(() => setUnmount(true), 250);
       return () => clearTimeout(t);
     }
 
-    // Lock scroll during the sequence
+    // Lock scroll + freeze Hero content animations until the image is in place
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    document.body.classList.add("preloading");
 
     const timers = [
       setTimeout(() => setStage(1), 40),     // title in
       setTimeout(() => setStage(2), 600),    // image crop emerges
       setTimeout(() => setStage(3), 1300),   // image expands, text fades
-      setTimeout(() => setStage(4), 2100),   // image fills viewport
-      setTimeout(() => {                     // white veil dissolves
+      setTimeout(() => {                     // image fills + unfreeze Hero anims
+        setStage(4);
+        document.body.classList.remove("preloading");
+      }, 2100),
+      setTimeout(() => {                     // veil dissolves while text staggers in
         setStage(5);
         document.body.style.overflow = prevOverflow;
-      }, 2500),
-      setTimeout(() => setUnmount(true), 3300),
+      }, 2400),
+      setTimeout(() => setUnmount(true), 4200),
     ];
 
     return () => {
       timers.forEach(clearTimeout);
       document.body.style.overflow = prevOverflow;
+      document.body.classList.remove("preloading");
     };
   }, []);
+
 
   if (unmount) return null;
 
