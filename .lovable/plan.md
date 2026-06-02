@@ -1,29 +1,35 @@
-## Album page polish
+# Resizable Navbar Integration
 
-### 1. Dotted canvas + visible boundary
-- Add a subtle dot-grid background to the `PhotoDraggable` container (CSS `radial-gradient` of 1px dots at ~24px spacing, low-opacity ink color, themed).
-- Wrap the moodboard in a visible boundary: a thin hairline border with rounded corners and inset shadow, sitting inside the section padding so users see where cards can be tossed.
-- Constrain drag to that boundary instead of the full window: replace the `useEffect` that sets `constraints` from `window.innerWidth/innerHeight` with a `dragConstraints` ref pointing at the container element (passed down via a context or prop on `DraggableCardContainer`). Cards can no longer fly off-screen.
+Swap the current `SiteNav` for the Aceternity-style resizable navbar that shrinks/blurs on scroll, while keeping all existing routes, theme toggle, and brand identity.
 
-### 2. Increase drag sensitivity / throw
-In `src/components/ui/draggable-card.tsx`:
-- Lower spring damping and raise stiffness on the post-release `animate` calls so cards travel further and settle faster.
-- Increase the velocity multiplier from `0.3` → `~0.6` so a flick throws the card noticeably further.
-- Raise the max `bounce` cap from `0.8` → `1.0` and tune the springs (`stiffness: 80`, `damping: 12`) for a more physical toss.
-- Add `dragElastic: 0.8` (up from default ~0.5) so the card follows the cursor more responsively.
+## Files
 
-### 3. Theme on /album
-The route hardcodes `bg-[#fbf9f4] text-[#222]` and the moodboard uses `#1a1a1a` text, so the global `ThemeToggle` has no effect on this page. Fix:
-- Replace hardcoded colors on `src/routes/album.tsx` with semantic tokens: `bg-background text-foreground`, `text-muted-foreground`, etc. Headline uses `text-foreground`, helper copy uses `text-muted-foreground`.
-- In `src/components/photo-draggable.tsx`, swap the centered watermark `text-[#1a1a1a]/15` for `text-foreground/15`, and the card caption gradient/colors stay (they sit over the photo, so they remain ink-on-image and work in both themes).
-- In `draggable-card.tsx`, swap `bg-[#efeae0]` for `bg-card` so the card frame follows theme. Keep shadow.
-- Verify `ThemeToggle` itself works (it does — toggles `.dark` on `<html>`). The bug is only that album styles ignored tokens.
+1. **`src/components/ui/resizable-navbar.tsx`** (new)
+   - Port the primitive from the snippet: `Navbar`, `NavBody`, `NavItems`, `MobileNav`, `MobileNavHeader`, `MobileNavMenu`, `MobileNavToggle`, `NavbarLogo`, `NavbarButton`.
+   - Use `motion/react` (already installed as `motion`) for `useScroll` / `useMotionValueEvent` / `AnimatePresence`.
+   - Replace `@tabler/icons-react` (not installed, avoid extra dep) with `Menu` / `X` from `lucide-react` (already used).
+   - Replace hardcoded `bg-white`, `text-black`, `text-zinc-*`, `dark:bg-neutral-950` etc. with semantic tokens: `bg-background/80`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-accent` for the hover pill. Keeps the toggle working in both themes.
+   - `NavbarLogo` becomes a TanStack `<Link to="/">` rendering `Premansh.` with the gold dot (matches current brand).
+   - `NavbarButton` supports `as={Link}` for internal navigation and a `gold` variant for the CTA.
 
-### Files touched
-- `src/routes/album.tsx` — semantic colors, dotted/boundary wrapper around `<PhotoDraggable />`.
-- `src/components/photo-draggable.tsx` — pass container ref for boundary constraints, themed watermark.
-- `src/components/ui/draggable-card.tsx` — accept `dragConstraints` ref, raise sensitivity, themed card bg.
-- `src/styles.css` — add a `.dot-grid` utility (themed via `currentColor` or token).
+2. **`src/components/site-nav.tsx`** (rewrite, same export)
+   - Replace the current sticky header with the new primitives.
+   - Desktop `NavItems` fed from existing `NAV` array. Hash links (`/#about`, `/#skills`, `/#certifications`, `/#contact`) stay as `<a href>`; route links (`/projects`, `/album`) become `<Link>` via `NavbarButton as={Link}` or a small wrapper inside `NavItems` that picks the right element by prefix.
+   - Right side: `ThemeToggle` + a gold "Contact" `NavbarButton` (`href="/#contact"`).
+   - Mobile: `MobileNav` + `MobileNavHeader` (logo, theme toggle, hamburger) + `MobileNavMenu` listing the same items in serif type matching the current overlay aesthetic.
+   - Keep `fixed inset-x-0 top-0 z-50` wrapper so it floats over hero like today.
 
-### Out of scope
-Homepage `PhotoSurfer`, lightbox, data layer, Supabase. No new deps.
+3. **No changes** to `__root.tsx` — `<SiteNav />` is still rendered there.
+
+## Behavior
+
+- Scroll < 100px: full-width transparent bar (matches current top-of-page look).
+- Scroll ≥ 100px: width animates to ~40rem max, `backdrop-blur-md`, subtle border + shadow, pill-shaped.
+- Hover on a nav item shows the animated `bg-accent` pill behind the label.
+- Theme toggle keeps working (it already toggles `.dark` on `<html>`).
+
+## Out of scope
+
+- No new npm packages (reuse `motion`, `lucide-react`).
+- No demo `DummyContent` page — the snippet's demo content is ignored.
+- No route changes, no footer changes, no homepage layout changes.
