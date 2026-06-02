@@ -1,99 +1,47 @@
 ## Goal
 
-Replace the current `/album` (PhotoStrip + PhotoChapter) with a from-scratch, 3D scroll-driven "Photo Surfer" rooted in the portfolio's editorial design language — white background, charcoal type, gold accents, Instrument Serif. All photos live in Supabase Storage; the `photos` table is the single source of truth. Adding a photo = upload + insert row, no code changes.
+Replace the horizontal 3D scroll rail on `/album` with a **draggable, scattered photo card stack** (Aceternity-style draggable cards), keeping all existing data wiring (Supabase `photos` table, slug deep-linking, PhotoStory panel) and the luxury editorial design language (white/cream bg, charcoal type, gold accents, Instrument Serif).
 
----
+## Scope
 
-## 1. Database (extend existing `photos`)
+- Only the `/album` rail experience changes. Featured Frames on homepage continues to use the existing compact `PhotoSurfer` (no change).
+- Data, server functions, storage, schema, and PhotoStory panel are **unchanged**.
 
-Migration adds columns the surfer + story panel need, keeps existing rows intact:
+## Changes
 
-- `slug` text unique (auto-generated from title if null)
-- `storage_path` text — path inside the `photography` bucket
-- `country` text
-- `featured` boolean default false
+### 1. Add primitive: `src/components/ui/draggable-card.tsx`
+- Port the supplied component verbatim (uses `motion/react`, already installed for CometCard).
+- Exports `DraggableCardBody` and `DraggableCardContainer`.
+- Keep `cn` import from `@/lib/utils`. Cards: `rounded-[2px]` to match `surfer-card-frame` aesthetic instead of `rounded-md`, and swap `bg-neutral-100 dark:bg-neutral-900` for our cream `#efeae0` so it matches the editorial frame.
 
-Data migration:
-- For existing rows where `image_url` points to public Supabase URLs, attempt to derive `storage_path`. Where that's not possible, leave `image_url` as fallback and set `storage_path` null — the resolver below handles both.
-- Backfill `slug` from `title`.
+### 2. New composed component: `src/components/photo-draggable.tsx`
+- Takes `photos: Photo[]` and optional `onSelect(slug)`.
+- Renders a `DraggableCardContainer` with `relative` positioning, min height `~85vh`, on the cream `#fbf9f4` canvas of /album.
+- Centered backdrop caption (under the cards, low opacity) — serif headline already lives in the page header, so the backdrop text reads small/muted: e.g. "Drag · Toss · Explore" in gold tracked caps. Optional; can be omitted to keep it pure.
+- Maps photos to `DraggableCardBody` instances scattered with deterministic-but-varied `top/left/rotate` classes (computed from index so layout is stable across renders, not random per render — avoids hydration jumps). Example pattern cycles through 7 preset positions like the demo.
+- Each card: 3:4 aspect, `w-64 md:w-72`, the photo as a full-bleed `<img>` inside, with a thin caption strip at the bottom showing title (serif) + location (charcoal xs). Click (non-drag) opens the story panel via `onSelect(slug)`.
+- Click vs drag: track pointer-down position; only fire `onSelect` if pointer moved < 6px between down and up (standard drag-vs-click guard). This avoids the story opening every time the user tosses a card.
+- Respects `prefers-reduced-motion`: falls back to a static masonry-style grid of the same cards (no drag, no rotation) so the page remains usable.
 
-Keep RLS as-is (public SELECT).
+### 3. Update `src/routes/album.tsx`
+- Replace `<PhotoSurfer photos={photos} onSelect={open} />` with `<PhotoDraggable photos={photos} onSelect={open} />`.
+- Adjust the surrounding section: remove the `pb-24 md:pb-32` rail wrapper, use a `relative` full-width container sized to hold the scattered cards (e.g. `min-h-[85vh]`).
+- Update the header copy hint: change "Scroll, drag, or use the arrow keys to surf the rail" → "Drag the frames around. Click one to open its story." Keep everything else (eyebrow, headline, frame count, Instagram CTA) intact.
+- Keep `PhotoStory` deep-linking via `?photo=<slug>` unchanged.
 
-## 2. Storage
+### 4. Keep PhotoSurfer
+- Do **not** delete `src/components/photo-surfer.tsx`; the homepage Featured Frames still uses it.
 
-- Create public bucket `photography`.
-- Add `storage.objects` RLS: public SELECT on `bucket_id = 'photography'`.
-- No write policies — uploads happen via Lovable Cloud UI / admin tools.
-
-## 3. Server function
-
-`src/lib/photos.functions.ts` (extend existing):
-- `listPhotos()` — returns all photos, sorted by `sort_order`, with a resolved `image` URL: `storage_path` → `supabase.storage.from('photography').getPublicUrl()`, falling back to `image_url`.
-- `listFeaturedPhotos(limit)` — same, filtered to `featured = true`.
-- `getPhotoBySlug(slug)` — for deep-linkable story panels.
-
-Returns plain DTOs matching the new `Photo` type (id, slug, title, image, location, country, category, story, date_taken, camera, lens, settings, featured).
-
-## 4. The Photo Surfer component
-
-`src/components/photo-surfer.tsx` — built from scratch, NOT a generic demo.
-
-Layout:
-- Top-left header block:
-  - Eyebrow: `PHOTOGRAPHY JOURNAL` in 10px gold tracked caps
-  - Headline: "Moments & Frames" in Instrument Serif
-  - Meta: dynamic `(42 Frames)` count + "A visual archive of places, experiments, observations, and stories."
-- Horizontal track of cards, each card 3:4, charcoal frame on white.
-- Scroll-driven horizontal motion with perspective: cards rotate slightly toward viewer as they pass center (CSS `perspective` + `rotateY` driven by scroll progress). Inertial, calm — no aggressive snap.
-- Wheel + drag + arrow-key navigation. Keyboard accessible; respects `prefers-reduced-motion` (falls back to a clean horizontal grid).
-- Each card overlay on hover: gold hairline border, subtle white-to-cream gradient bottom, text reveals title (Instrument Serif), location (charcoal), category (gold caps).
-
-## 5. Story panel (click-through)
-
-`src/components/photo-story.tsx` — full-bleed editorial entry, not a lightbox:
-- Slides in from the right (or fades up on mobile), takes ~92vw, scrollable internally.
-- Left column: large image (object-contain, framed in cream).
-- Right column (editorial): category eyebrow, serif title, location · country, date_taken, story prose, then a small "Made with" block listing camera / lens / settings as charcoal mono.
-- Deep-linkable via `?photo=<slug>` search param.
-- Close on Esc / backdrop / button.
-
-## 6. /album route
-
-Rewrite `src/routes/album.tsx`:
-- White background, editorial spacing.
-- Renders `<PhotoSurfer photos={...} />` and `<PhotoStory />` when a slug is in the search params.
-- Loader uses `ensureQueryData(listPhotos)`.
-- Keep Instagram CTA line.
-
-Delete `src/components/photo-strip.tsx` and `src/components/photo-chapter.tsx`.
-
-## 7. Homepage Featured Frames
-
-New section in `src/routes/index.tsx` (above contact):
-- Eyebrow `FEATURED FRAMES`, serif headline, 3–5 featured photos in a compact horizontal strip (same surfer, smaller scale, no full chrome).
-- CTA: `Explore Photography Journal →` linking to `/album`.
-
-## 8. Design tokens
-
-Uses existing tokens (`--background`, `--foreground`, `--gold`, Instrument Serif). Adds two utility classes in `styles.css` if needed: `.surfer-card-frame` (cream border + soft shadow) and a `--shadow-editorial` token.
-
----
-
-## Technical notes
-
-- Scroll motion: native `scroll` event on a horizontal container + `requestAnimationFrame`, no external dep.
-- Image loading: `loading="lazy"`, `decoding="async"`, intrinsic aspect-ratio to prevent CLS.
-- Public URLs computed on the server in the listing function (cheap, deterministic) so client doesn't need the storage SDK.
-- Adding a photo flow: upload to `photography` bucket via Lovable Cloud → insert row in `photos` with `storage_path` set → appears automatically (router invalidate on next nav, or `staleTime: 0`).
+## Out of scope
+- No database / storage / server function changes.
+- No homepage changes.
+- No new dependencies (`motion` is already installed).
 
 ## Files
 
-- Migration: extend `photos`, create `photography` bucket policy.
-- New: `src/components/photo-surfer.tsx`, `src/components/photo-story.tsx`.
-- Edited: `src/lib/photos.functions.ts`, `src/lib/photos.types.ts` (if exists, else add), `src/routes/album.tsx`, `src/routes/index.tsx`.
-- Deleted: `src/components/photo-strip.tsx`, `src/components/photo-chapter.tsx`.
+- **Created:** `src/components/ui/draggable-card.tsx`, `src/components/photo-draggable.tsx`
+- **Edited:** `src/routes/album.tsx`
 
-## Out of scope
+## Open question
 
-- Admin upload UI (uploads done via Cloud dashboard for now).
-- Pagination — full list ships at once; revisit if count grows past ~80.
+Should the scattered layout be **fully overlapping pile** (demo-style, cards stacked with rotations across center) or **spread across the canvas** (more like a pinned moodboard, less overlap, every photo visible at rest)? I'll default to **moodboard spread** since the journal has many photos and a pure pile would hide most of them — let me know if you'd rather have the tight pile.
