@@ -87,7 +87,7 @@ export function Preloader() {
         className="absolute inset-0 bg-white"
         style={{
           opacity: veilOpacity,
-          transition: `opacity 1000ms ${ease}`,
+          transition: `opacity 700ms ${ease}`,
         }}
       />
 
