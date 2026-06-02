@@ -1,10 +1,12 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
 import { z } from "zod";
 import { listPhotos } from "@/lib/photos.functions";
 import { PhotoStrip } from "@/components/photo-strip";
 import { PhotoChapter } from "@/components/photo-chapter";
 import { Reveal } from "@/components/reveal";
+import { INSTAGRAM_PHOTO_URL } from "@/data/contact";
 
 const photosQueryOptions = queryOptions({
   queryKey: ["photos"],
