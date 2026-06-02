@@ -98,7 +98,7 @@ function Index() {
       <Hero />
       <About />
       <Skills />
-      <Tools />
+      
       <FeaturedProjects />
       <Certifications />
       <Contact />
