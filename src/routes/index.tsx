@@ -170,7 +170,7 @@ function Hero() {
       <a
         href="#about"
         aria-label="Scroll"
-        className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] uppercase tracking-[0.4em] text-[#D8D8D8]/70 animate-[fadeUp_900ms_ease-out_1800ms_both]"
+        className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 rounded-md text-[10px] uppercase tracking-[0.4em] text-[#D8D8D8]/70 animate-[fadeUp_900ms_ease-out_1800ms_both] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         Scroll
         <ArrowDown className="h-4 w-4 animate-bounce text-[#D4A54A]" />
