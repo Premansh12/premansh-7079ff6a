@@ -18,42 +18,54 @@ export type Database = {
         Row: {
           camera: string | null
           category: string | null
+          country: string | null
           created_at: string
           date_taken: string | null
+          featured: boolean
           id: string
           image_url: string
           lens: string | null
           location: string | null
           settings: string | null
+          slug: string | null
           sort_order: number
+          storage_path: string | null
           story: string | null
           title: string
         }
         Insert: {
           camera?: string | null
           category?: string | null
+          country?: string | null
           created_at?: string
           date_taken?: string | null
+          featured?: boolean
           id?: string
           image_url: string
           lens?: string | null
           location?: string | null
           settings?: string | null
+          slug?: string | null
           sort_order?: number
+          storage_path?: string | null
           story?: string | null
           title: string
         }
         Update: {
           camera?: string | null
           category?: string | null
+          country?: string | null
           created_at?: string
           date_taken?: string | null
+          featured?: boolean
           id?: string
           image_url?: string
           lens?: string | null
           location?: string | null
           settings?: string | null
+          slug?: string | null
           sort_order?: number
+          storage_path?: string | null
           story?: string | null
           title?: string
         }

@@ -19,6 +19,8 @@ import { SkillPanel } from "@/components/skill-panel";
 import { SKILL_ROLES } from "@/data/skill-roles";
 import heroPortrait from "@/assets/premansh-hero.png";
 import { listProjects } from "@/lib/projects.functions";
+import { listFeaturedPhotos } from "@/lib/photos.functions";
+import { PhotoSurfer } from "@/components/photo-surfer";
 import {
   EMAIL,
   MAILTO,
@@ -47,6 +49,11 @@ const featuredProjectsQueryOptions = queryOptions({
   queryFn: () => listProjects(),
 });
 
+const featuredPhotosQueryOptions = queryOptions({
+  queryKey: ["photos", "featured"],
+  queryFn: () => listFeaturedPhotos({ data: { limit: 8 } }),
+});
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -59,7 +66,12 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(featuredProjectsQueryOptions),
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(featuredProjectsQueryOptions),
+      context.queryClient.ensureQueryData(featuredPhotosQueryOptions),
+    ]);
+  },
   errorComponent: () => (
     <div className="grid min-h-[60vh] place-items-center px-6 text-center">
       <p className="text-muted-foreground">Something went wrong. Please try again later.</p>
@@ -143,8 +155,9 @@ function Index() {
       <Hero />
       <About />
       <Skills />
-      
+
       <FeaturedProjects />
+      <FeaturedFrames />
       <Certifications />
       <Contact />
     </>
@@ -372,6 +385,40 @@ function FeaturedProjects() {
     </section>
   );
 }
+
+// ------------------------------------------------------------
+// Featured Frames — a compact photo-surfer strip on the home
+// page that previews the photography journal. Pulls only
+// featured = true rows from Supabase.
+// ------------------------------------------------------------
+function FeaturedFrames() {
+  const { data: frames } = useSuspenseQuery(featuredPhotosQueryOptions);
+  if (frames.length === 0) return null;
+  return (
+    <section id="frames" className="bg-[#fbf9f4] py-32 text-[#222] md:py-44">
+      <div className="mx-auto max-w-7xl px-6 md:px-12">
+        <div className="mb-12 flex flex-wrap items-end justify-between gap-8">
+          <div>
+            <p className="mb-4 text-xs uppercase tracking-[0.35em] text-gold">
+              Featured Frames
+            </p>
+            <h2 className="font-serif text-5xl leading-[1] text-[#1a1a1a] md:text-6xl">
+              From the <em className="italic">journal</em>.
+            </h2>
+          </div>
+          <Link
+            to="/album"
+            className="gold-link text-sm text-[#555] hover:text-[#1a1a1a]"
+          >
+            Explore Photography Journal →
+          </Link>
+        </div>
+      </div>
+      <PhotoSurfer photos={frames} variant="compact" />
+    </section>
+  );
+}
+
 
 // ------------------------------------------------------------
 // Certifications — vertical timeline. Center spine on desktop,
