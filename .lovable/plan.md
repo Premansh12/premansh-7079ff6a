@@ -1,99 +1,86 @@
 ## Goal
 
-Replace the current 4-column minimalist Skills grid in `src/routes/index.tsx` with a 2-column editorial showcase of 11 large "visual identity" cards — one per role. Imagery is the hero; each card expands on click to reveal a richer layer (expertise, tools, selected work, highlights). Aesthetic, palette, and typography stay locked.
+Keep the existing 11 cinematic images, titles, descriptions, numbering, and gold/charcoal/serif identity. Replace the oversized 2-col expanding cards with a compact, uniform 4-col marketplace-style grid, and move all expanded content into a premium side panel.
 
-## What ships
+## What changes
 
-### 1. Visuals — 11 AI-generated cinematic illustrations
+### 1. `src/components/skill-card.tsx` — compact uniform card
 
-Generated with `imagegen--generate_image` at `premium` quality, saved to `src/assets/skills/`, imported as ES modules. Each image is a luxury-magazine still life (Aesop / Monocle / Apple product photo register) — soft dramatic studio lighting, off-white backdrop, depth, shadows, no people, no text, no UI chrome that would clash with the page. Same aspect (4:5 portrait, 1024×1280) and consistent palette (warm neutrals + a single gold/charcoal note) so all 11 read as one set.
+New layout (fixed structure, no inline expansion):
 
-Per-role direction (one image each):
-- **Web Designer** — open hardcover editorial magazine spread, gridded type specimen on left page, vellum overlay
-- **Branding Expert** — stacked monogrammed brand book, embossed paper swatch, brass clip
-- **Website Developer** — frosted glass panel etched with monospaced code fragment, brushed brass edge
-- **UI/UX Designer** — matte black tablet leaning on linen, single product screen, ceramic stylus
-- **Graphic Designer** — folded silkscreen poster, ink roller, type specimen card
-- **Video Editor** — vintage 16mm film reel, color grading swatch strip, lens
-- **Vibe Coder** — translucent acrylic terminal block, generative wireframe inside, soft gold caustics
-- **Future Doctor** — leather-bound clinical notebook, antique stethoscope, pressed botanical
-- **Hobbyist** — workbench corner, half-finished wooden model, tools laid in a row
-- **Tinkerer** — opened mechanical watch movement, jeweler's loupe, brass tweezers
-- **Hobby Photographer** — vintage rangefinder camera, contact sheet, film canister
-
-### 2. Layout — editorial role cards
-
-Replaces the existing `Skills` component. 2-column responsive grid (1-col on mobile, 2-col from `md`), generous gaps, each card large enough to feel like a magazine plate.
-
-Per card structure:
 ```text
-┌──────────────────────────┬──────────────────────────┐
-│  01 / Eleven             │                          │
-│                          │   [cinematic image]      │
-│  Web Designer            │                          │
-│  Editorial layouts,      │                          │
-│  considered type…        │                          │
-│                          │                          │
-│  Explore  →              │                          │
-└──────────────────────────┴──────────────────────────┘
+┌────────────────────────┐
+│ 01     ROLE            │   ← top: number + category label
+├────────────────────────┤
+│                        │
+│   [cinematic image]    │   ← center: 4:5 image, object-cover
+│                        │
+├────────────────────────┤
+│ Web Designer           │   ← bottom: serif title
+│ Editorial layouts and  │   one-line tagline (clamped)
+│ considered digital…    │
+└────────────────────────┘
 ```
-- Left: role number (`01/11`), serif title (Instrument Serif, large), short description (kept from current copy), gold "Explore" affordance.
-- Right: full-bleed image, charcoal hairline border, subtle gold glow on hover.
-- Hover: card lifts (`-translate-y-1`), image scales `1.04` with eased transition, gold ring fades in, soft drop shadow. Cursor-reactive lighting via a single radial gradient pinned to pointer coords (lightweight `onMouseMove`, no library).
 
-### 3. Click-to-expand layer
+- Single `<button>` wrapping the card, fires `onOpen()` (no in-grid expansion, no `expanded` prop).
+- Image wrapper uses `aspect-[4/5]` so every card is identical height regardless of viewport.
+- Tagline clamped to one line on desktop, two on mobile (`line-clamp-1 md:line-clamp-2`).
+- Hover: `-translate-y-0.5`, gold ring fades in (`ring-gold/30`), image `scale-[1.04]` over 700ms, soft gold glow shadow. No card resize.
+- Pointer-reactive gold wash kept but toned down (smaller radius, lower opacity) so it reads at small size.
+- Remove `Plus`/`X`/"Explore" affordance — replaced by a tiny gold arrow in the top-right that animates on hover.
 
-Clicking a card animates an expanded panel inline beneath that card (full grid-row width) revealing four sections, separated by gold hairlines:
-- **Areas of expertise** — 3–5 bullets
-- **Tools & technologies** — chip row (reuses tokens from existing Tools section)
-- **Selected work** — 1–3 entries, linked to existing `/projects/$slug` where relevant (e.g. Branding Expert → Mascara Skincare)
-- **Highlights** — 2–3 short statements
+### 2. `src/components/skill-panel.tsx` — new side panel for details
 
-Only one card open at a time (`useState<string | null>`). Expansion uses height-auto + opacity transition; the trigger card itself stays visible.
+Built on the existing shadcn `Sheet` primitive (`src/components/ui/sheet.tsx`), `side="right"`, width `w-full sm:max-w-xl lg:max-w-2xl`, background `bg-background`, charcoal hairline borders, gold accents.
 
-### 4. Content — defaults written from existing portfolio context
+Panel content (same data already in `SKILL_ROLES`, no new fields):
 
-Eleven role records drafted from the portfolio's existing voice (About copy, Tools section, projects). Examples:
-- *Branding Expert* → expertise: identity systems, packaging, type specimens; tools: Illustrator, InDesign, Figma; selected work: Mascara Skincare; highlights: "Concept-first identities", "Editorial restraint as a brand voice".
-- *Future Doctor* → expertise: clinical reasoning, anatomy, evidence-based thinking; tools: Notion, research notebooks; highlights: "Currently MBBS, IIMSAR Haldia (Dec 2024 — present)".
+```text
+01 / 11                              ROLE
+Web Designer
+Editorial layouts and considered digital experiences.
 
-All content lives in a single typed array (`SKILL_ROLES`) in `src/data/skill-roles.ts` shaped to mirror a future Supabase table — see Technical notes.
+[cinematic image — 16:10, full panel width]
 
-### 5. Visual consistency
+Design philosophy        ← derived from existing tagline (no new copy)
+Areas of expertise       ← role.expertise
+Tools & technologies     ← role.tools (chip row)
+Selected work            ← role.selectedWork (links to /projects/$slug)
+Highlights               ← role.highlights
+```
 
-Reuses existing `--gold`, `--foreground` (charcoal), `font-serif` Instrument Serif, `Reveal` component, `hairline` utility. No new color tokens. Section background stays `bg-muted/40` to match current page rhythm.
+- One panel instance lives in the Skills section; opens for the active role.
+- Close via `X`, overlay click, or `Esc` (handled by Sheet).
+- Body scroll locked while open (Sheet default).
+- Reuses the existing `Block` styling pattern (gold uppercase label, hairlines).
+
+### 3. Skills section in `src/routes/index.tsx`
+
+- Grid: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8`.
+- State: `const [activeSlug, setActiveSlug] = useState<string | null>(null)`.
+- Each `<SkillCard role={r} total={11} onOpen={() => setActiveSlug(r.slug)} />`.
+- Render `<SkillPanel role={activeRole} open={!!activeSlug} onOpenChange={(o) => !o && setActiveSlug(null)} />` once at section root.
+- `Reveal` stagger preserved but reduced (cards are smaller — 40–60ms steps).
+- Section heading and intro copy unchanged.
+
+## Preserved
+
+- All 11 images in `src/assets/skills/*.jpg` — untouched.
+- `src/data/skill-roles.ts` shape and content — untouched (no schema change, future Supabase swap still 1:1).
+- Color tokens, `font-serif`, `Reveal`, `hairline`, gold accent, section background.
+- Tools section below Skills.
 
 ## Out of scope
 
-- Supabase table + migration for skill roles (data file is shaped for it; migration in a later pass)
-- Per-role pages or routing
-- Replacing the Tools section (it sits below Skills and stays as-is)
-- Touching any other section
+- Regenerating or re-cropping any image.
+- Editing role copy, titles, tagline text, or order.
+- Supabase migration for `skill_roles`.
+- Any other section on the page.
 
-## Technical notes
+## Files
 
-**Data shape** (`src/data/skill-roles.ts`) — designed so a Supabase table swap is a one-file change later:
-```ts
-export type SkillRole = {
-  slug: string;            // 'web-designer'
-  index: number;           // 1..11
-  title: string;
-  tagline: string;         // short card description
-  image: string;           // imported asset URL
-  expertise: string[];
-  tools: string[];
-  selectedWork: { label: string; href?: string }[];
-  highlights: string[];
-};
-```
-The future Supabase table would mirror this 1:1 (`skill_roles` with the array fields as `jsonb`), letting a server fn return the same DTO with no component changes.
+- Edit: `src/components/skill-card.tsx` (rewrite into compact card, drop `expanded`/`onToggle` props).
+- New: `src/components/skill-panel.tsx` (Sheet-based detail view).
+- Edit: `src/routes/index.tsx` (Skills section — new grid + panel wiring; remove single-open `useState<string|null>` toggle logic in favor of `activeSlug` driving the panel).
 
-**Files**:
-- `src/data/skill-roles.ts` — new, 11 typed records
-- `src/assets/skills/*.jpg` — 11 generated images (premium quality, 1024×1280)
-- `src/components/skill-card.tsx` — new card + expand panel + pointer-light hook
-- `src/routes/index.tsx` — replace existing `Skills` component (and its `SKILLS` array) with the new one; remove the now-unused `Skill` type
-
-**Performance**: images set `loading="lazy"` except the first 2; same `Reveal` staggering already used elsewhere.
-
-**Animations**: pure Tailwind + CSS transitions; no new dependencies.
+No new dependencies. Pure Tailwind + existing shadcn Sheet.
