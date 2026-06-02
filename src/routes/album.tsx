@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import { z } from "zod";
 import { listPhotos } from "@/lib/photos.functions";
-import { PhotoSurfer } from "@/components/photo-surfer";
+import { PhotoDraggable } from "@/components/photo-draggable";
 import { PhotoStory } from "@/components/photo-story";
 import { Reveal } from "@/components/reveal";
 import { INSTAGRAM_PHOTO_URL } from "@/data/contact";
@@ -73,8 +73,8 @@ function AlbumPage() {
           <Reveal delay={220}>
             <p className="mt-5 max-w-xl text-sm text-[#555] md:text-base">
               A visual archive of places, experiments, observations, and stories.
-              Scroll, drag, or use the arrow keys to surf the rail. Click a frame
-              to open the journal entry behind it.
+              Drag the frames around the canvas. Click one to open the journal
+              entry behind it.
             </p>
           </Reveal>
           <Reveal delay={320}>
@@ -91,9 +91,9 @@ function AlbumPage() {
         </div>
       </section>
 
-      {/* The surfer rail */}
+      {/* Draggable moodboard */}
       <section className="pb-24 md:pb-32">
-        <PhotoSurfer photos={photos} onSelect={open} />
+        <PhotoDraggable photos={photos} onSelect={open} />
       </section>
 
       {selected && <PhotoStory photo={selected} onClose={close} />}
