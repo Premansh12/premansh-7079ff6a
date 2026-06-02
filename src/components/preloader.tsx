@@ -96,7 +96,7 @@ export function Preloader() {
         <div
           style={{
             ...maskStyle,
-            transition: `width 1500ms ${ease}, height 1500ms ${ease}, clip-path 1300ms ${ease}, opacity 900ms ${ease}`,
+            transition: `width 850ms ${ease}, height 850ms ${ease}, clip-path 750ms ${ease}, opacity 500ms ${ease}`,
             willChange: "width, height, clip-path, opacity",
           }}
         >
