@@ -1,6 +1,7 @@
 import { useRef, useState, type MouseEvent } from "react";
 import { ArrowUpRight } from "lucide-react";
 import type { SkillRole } from "@/data/skill-roles";
+import { CometCard } from "@/components/ui/comet-card";
 
 type Props = {
   role: SkillRole;
