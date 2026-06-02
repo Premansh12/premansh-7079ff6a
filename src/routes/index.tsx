@@ -1,13 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
   ArrowDown,
-  Send,
   Award,
   ExternalLink,
   Download,
+  Linkedin,
+  Github,
+  Twitter,
+  Instagram,
+  Mail,
 } from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import { SkillCard } from "@/components/skill-card";
@@ -15,6 +18,28 @@ import { SkillPanel } from "@/components/skill-panel";
 import { SKILL_ROLES } from "@/data/skill-roles";
 import heroPortrait from "@/assets/premansh-hero.png";
 import { listProjects } from "@/lib/projects.functions";
+import {
+  EMAIL,
+  MAILTO,
+  LOCATION_CONTACT,
+  SOCIALS,
+  type SocialKey,
+} from "@/data/contact";
+
+const SOCIAL_ICONS: Record<SocialKey, typeof Linkedin> = {
+  linkedin: Linkedin,
+  github: Github,
+  x: Twitter,
+  instagram: Instagram,
+};
+
+const AVAILABILITY = [
+  "Design Projects",
+  "Branding Collaborations",
+  "UI/UX Consulting",
+  "Creative Experiments",
+  "Research & Innovation Discussions",
+];
 
 const featuredProjectsQueryOptions = queryOptions({
   queryKey: ["projects", "list"],
