@@ -136,6 +136,15 @@ body.preloading #top :not(img) {
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+  .dot-grid {
+    background-image: radial-gradient(
+      circle,
+      color-mix(in oklab, var(--foreground) 18%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 22px 22px;
+  }
+
   .surfer-card-frame {
     background: #efeae0;
     box-shadow:
