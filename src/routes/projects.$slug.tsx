@@ -1,43 +1,33 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, ExternalLink } from "lucide-react";
-import {
-  getAdjacentProjects,
-  getProject,
-  getRelatedProjects,
-  type Project,
-} from "@/data/projects";
+import { getProjectDetail } from "@/lib/projects.functions";
+import type { Project } from "@/lib/projects.types";
 import { Lightbox } from "@/components/lightbox";
 import { Reveal } from "@/components/reveal";
 
 // ============================================================
 // Reusable Project Detail Template
 // ------------------------------------------------------------
-// This route is data-driven. It reads a Project record from
-// `src/data/projects.ts` (which can be swapped for a Supabase
-// loader later) and renders a complete luxury case study with:
-//
-//   • Hero / cover image
-//   • Title, category, year meta
-//   • Overview, Challenge, Solution, Process
-//   • Gallery with lightbox
-//   • Tools & technologies
-//   • Key outcomes / results
-//   • Behance case study button
-//   • Previous / Next navigation
-//   • Related projects
-//
-// No content lives in this file — duplicate a record in
-// `projects` (or insert a row in your CMS) and the page is built.
+// Data-driven from Supabase via getProjectDetail (server fn).
+// Adding a new row in the projects table produces a fully
+// styled case study with zero template changes.
 // ============================================================
 
+const projectDetailQueryOptions = (slug: string) =>
+  queryOptions({
+    queryKey: ["projects", "detail", slug],
+    queryFn: () => getProjectDetail({ data: { slug } }),
+  });
+
 export const Route = createFileRoute("/projects/$slug")({
-  loader: ({ params }) => {
-    const project = getProject(params.slug);
-    if (!project) throw notFound();
-    const { prev, next } = getAdjacentProjects(params.slug);
-    const related = getRelatedProjects(params.slug, 3);
-    return { project, prev, next, related };
+  loader: async ({ params, context }) => {
+    const detail = await context.queryClient.ensureQueryData(
+      projectDetailQueryOptions(params.slug),
+    );
+    if (!detail) throw notFound();
+    return detail;
   },
   head: ({ params, loaderData }) => {
     const p = loaderData?.project;
@@ -88,11 +78,11 @@ export const Route = createFileRoute("/projects/$slug")({
       </div>
     </div>
   ),
-  errorComponent: ({ error }) => (
+  errorComponent: () => (
     <div className="grid min-h-screen place-items-center px-6 text-center">
       <div>
         <h1 className="font-serif text-3xl">Couldn't load this project.</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
+        <p className="mt-2 text-sm text-muted-foreground">Please try again later.</p>
       </div>
     </div>
   ),
@@ -100,9 +90,14 @@ export const Route = createFileRoute("/projects/$slug")({
 });
 
 function ProjectPage() {
-  const { project, prev, next, related } = Route.useLoaderData();
+  const { slug } = Route.useParams();
+  const { data } = useSuspenseQuery(projectDetailQueryOptions(slug));
+  // ensureQueryData + notFound guarantees data here, but guard for types.
+  if (!data) return null;
+  const { project, prev, next, related } = data;
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const galleryUrls = project.gallery.map((g: { src: string }) => g.src);
+
 
   return (
     <article className="pt-32 md:pt-40">
