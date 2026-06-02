@@ -281,7 +281,8 @@ function Skills() {
 
 
 function FeaturedProjects() {
-  const featured = projects.slice(0, 4);
+  const { data: allProjects } = useSuspenseQuery(featuredProjectsQueryOptions);
+  const featured = allProjects.slice(0, 4);
   return (
     <section id="work" className="px-6 py-32 md:px-12 md:py-48">
       <div className="mx-auto max-w-7xl">
