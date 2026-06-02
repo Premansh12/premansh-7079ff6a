@@ -32,18 +32,18 @@ export function Preloader() {
     document.body.classList.add("preloading");
 
     const timers = [
-      setTimeout(() => setStage(1), 40),     // title in
-      setTimeout(() => setStage(2), 600),    // image crop emerges
-      setTimeout(() => setStage(3), 1300),   // image expands, text fades
+      setTimeout(() => setStage(1), 0),      // title in
+      setTimeout(() => setStage(2), 350),    // image crop emerges
+      setTimeout(() => setStage(3), 900),    // image expands, text fades
       setTimeout(() => {                     // image fills + unfreeze Hero anims
         setStage(4);
         document.body.classList.remove("preloading");
-      }, 2100),
+      }, 1400),
       setTimeout(() => {                     // veil dissolves while text staggers in
         setStage(5);
         document.body.style.overflow = prevOverflow;
-      }, 2400),
-      setTimeout(() => setUnmount(true), 4200),
+      }, 1500),
+      setTimeout(() => setUnmount(true), 2200),
     ];
 
     return () => {
@@ -94,7 +94,7 @@ export function Preloader() {
         className="absolute inset-0 bg-white"
         style={{
           opacity: veilOpacity,
-          transition: `opacity 700ms ${ease}`,
+          transition: `opacity 500ms ${ease}`,
         }}
       />
 
@@ -103,7 +103,7 @@ export function Preloader() {
         <div
           style={{
             ...maskStyle,
-            transition: `width 850ms ${ease}, height 850ms ${ease}, clip-path 750ms ${ease}, opacity 500ms ${ease}`,
+            transition: `width 600ms ${ease}, height 600ms ${ease}, clip-path 550ms ${ease}, opacity 400ms ${ease}`,
             willChange: "width, height, clip-path, opacity",
           }}
         >
@@ -121,7 +121,7 @@ export function Preloader() {
       {/* Editorial title block */}
       <div className="pointer-events-none absolute inset-0 grid place-items-center">
         <div
-          className="flex flex-col items-center text-center text-[#1a1a1a] mix-blend-difference"
+          className="flex flex-col items-center text-center text-foreground mix-blend-difference"
           style={{
             opacity: titleOut ? 0 : 1,
             transform: titleOut ? "translateY(-12px)" : "translateY(0)",

@@ -36,7 +36,7 @@ export function SkillCard({ role, total, onOpen }: Props) {
       onMouseMove={handleMove}
       onMouseLeave={() => setLight(null)}
       aria-label={`Open ${role.title} details`}
-      className="group relative grid aspect-[16/9] w-full grid-cols-[1fr_38%] overflow-hidden rounded-xl border border-border bg-background text-left transition-all duration-500 hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-[0_20px_50px_-25px_rgba(212,168,67,0.45)]"
+      className="group relative grid aspect-[2/1] w-full grid-cols-[1fr_34%] overflow-hidden rounded-xl border border-border bg-background text-left transition-all duration-500 hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-[0_20px_50px_-25px_rgba(212,168,67,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       {/* Cursor-reactive gold wash */}
       <div
@@ -46,9 +46,9 @@ export function SkillCard({ role, total, onOpen }: Props) {
       />
 
       {/* Content column */}
-      <div className="flex flex-col justify-between p-4 md:p-5">
+      <div className="flex flex-col gap-1.5 px-4 py-3">
         <div className="flex items-start justify-between gap-3">
-          <span className="font-serif text-[11px] tracking-wider text-gold">
+          <span className="font-serif text-[10px] tracking-wider text-gold">
             {String(role.index).padStart(2, "0")}
             <span className="text-muted-foreground/60">
               {" "}/ {String(total).padStart(2, "0")}
@@ -59,15 +59,15 @@ export function SkillCard({ role, total, onOpen }: Props) {
           </span>
         </div>
 
-        <h3 className="font-serif text-lg leading-tight md:text-xl">
+        <h3 className="font-serif text-base leading-tight md:text-lg">
           {role.title}
         </h3>
 
-        <div className="flex items-end justify-between gap-3">
-          <p className="line-clamp-1 flex-1 text-[12px] leading-relaxed text-muted-foreground">
+        <div className="mt-auto flex items-end justify-between gap-3">
+          <p className="line-clamp-1 flex-1 text-[11px] leading-relaxed text-muted-foreground">
             {role.tagline}
           </p>
-          <span className="flex shrink-0 items-center gap-1 text-[10px] uppercase tracking-[0.3em] text-muted-foreground transition-colors duration-300 group-hover:text-gold">
+          <span className="flex shrink-0 items-center gap-1 text-[9px] uppercase tracking-[0.3em] text-muted-foreground transition-colors duration-300 group-hover:text-gold">
             Explore
             <ArrowUpRight className="h-3 w-3 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </span>

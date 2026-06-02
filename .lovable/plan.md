@@ -1,54 +1,58 @@
-# Compact Editorial Capability Cards
+# Polish pass: faster handoff, denser skills, drop the Kit, fix a11y nits
 
-Replace the current tall 4:5-image cards with wide, fixed-height horizontal cards. 60% content / 40% image, same imagery, same panel, same data — only the card architecture changes.
+Used the accessibility skill to audit interactive bits along the way.
 
-## File: `src/components/skill-card.tsx` (full rewrite)
+## 1. Preloader → Hero handoff (faster, no lag)
 
-New layout — fixed aspect, no resize on hover:
+`src/components/preloader.tsx` — compress the timeline and overlap the veil dissolve with Hero text staggering in, so there's no gap.
 
 ```text
-┌──────────────────────────────────────────────────────┐
-│ 01 / 11                                         ROLE │
-│                                                      │
-│ Web Designer                          ┌────────────┐ │
-│                                       │            │ │
-│ Editorial layouts and             →   │   image    │ │
-│ considered digital experiences.       │            │ │
-│                              Explore →└────────────┘ │
-└──────────────────────────────────────────────────────┘
-       ~60% content                     ~40% image
+old → new
+40   → 0     Stage 1 (title in)
+600  → 350   Stage 2 (image crop emerges)
+1300 → 900   Stage 3 (image expands, title fades)
+2100 → 1400  Stage 4 (image fills, unfreeze Hero anims)
+2400 → 1500  Stage 5 (veil dissolves, 500ms)
+4200 → 2200  unmount
 ```
 
-- Outer button: `aspect-[16/9]` so card height tracks column width and stays uniform. Targets ~340×190 at 4-col on a typical desktop.
-- Inner: `grid grid-cols-[1fr_40%]` (mobile collapses to `grid-cols-[1fr_38%]` — image stays on the right at every breakpoint).
-- Left column (`flex flex-col justify-between p-5`):
-  - Top row: `01 / 11` (gold serif) on the left, `ROLE` label on the right.
-  - Middle: `<h3 class="font-serif text-lg md:text-xl leading-tight">` role title.
-  - Bottom row: one-line tagline (`line-clamp-1 text-[12px] text-muted-foreground`) + small `Explore →` with arrow that slides on hover (`group-hover:translate-x-0.5`).
-- Right column: image wrapper fills the card's full height, `h-full`, `object-cover object-center`, subtle inner gold ring on hover (`ring-1 ring-inset ring-gold/0 group-hover:ring-gold/30`). Image scales `1.04` on hover (existing 1200ms ease).
-- Cursor-reactive gold wash kept, radius reduced to ~160px and confined to the content side via a non-clipping overlay layer.
-- Hover surface: `hover:-translate-y-0.5`, `hover:border-gold/40`, `hover:shadow-[0_20px_50px_-25px_rgba(212,168,67,0.45)]`. No size/layout change.
-- Rounded corners `rounded-xl`, `overflow-hidden` so the image's right edge sits flush with the card.
+Also drop the veil dissolve duration from 700ms → 500ms and reduce mask transition from 850ms → 600ms. Net experience: ~2.2s from blank to interactive Hero, with the Hero text already staggering in during the last 700ms — no perceptible pause.
 
-Props unchanged: `{ role, total, onOpen }` — `SkillPanel` opens unchanged.
+## 2. Drop the Tools / Kit section from home
 
-## File: `src/routes/index.tsx` (grid only)
+`src/routes/index.tsx`:
+- Remove `<Tools />` from the `Index()` JSX.
+- Delete the `Tools` function (lines 317–389).
+- Delete the `TOOL_GROUPS` data and `Tool` / `ToolGroup` types (lines 95–146).
 
-- Grid stays `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`, gap tightened to `gap-4 lg:gap-5` so 4-up reads denser.
-- `Reveal` stagger reduced to ~30ms (cards are much shorter now).
-- Everything else in the Skills section (intro copy, `SkillPanel` mount, `activeSlug` state) untouched.
+Skills section stays; nothing else changes around it.
 
-## Preserved
+## 3. Skill cards: smaller & more compact
 
-- All 11 images in `src/assets/skills/*.jpg` — untouched, same `role.image` reference.
-- `src/data/skill-roles.ts` — untouched.
-- `SkillPanel` (side drawer on click) — untouched; click behavior identical.
-- Charcoal/gold palette, Instrument Serif, hairlines, existing `Reveal`.
+`src/components/skill-card.tsx`:
+- Change card aspect from `aspect-[16/9]` → `aspect-[2/1]` (much shorter — ~340×170 at 4-col desktop).
+- Image column from `38%` → `34%`.
+- Padding `p-5` → `px-4 py-3`.
+- Title size `text-lg md:text-xl` → `text-base md:text-lg`.
+- Tighten internal vertical rhythm via `gap-1.5` on the flex column (replaces `justify-between` which over-spaced when card is short).
+- Keep cursor wash, gold hover ring, image scale, `Explore →` arrow — just at smaller scale.
+
+`src/routes/index.tsx` Skills grid: gap `gap-4 lg:gap-5` → `gap-3 lg:gap-4`, Reveal stagger `30ms` → `20ms`.
+
+## 4. Accessibility / polish nits
+
+Audit results (only the actual hits — most shadcn primitives are fine):
+
+- **`src/components/preloader.tsx`** — the title block currently sets `text-[#1a1a1a]` then a wrapper uses `mix-blend-difference` with white children. Result is correct but hardcoded color; switch the wrapper to `text-foreground` so it follows theme tokens (passes a11y review's "no arbitrary colors" rule). No visual change.
+- **`src/components/skill-card.tsx`** — outer `<button>` already has `aria-label`; add `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background` so keyboard focus is visible (currently relies on browser default which the rounded border swallows).
+- **`src/components/back-to-top.tsx`** — verify `aria-label`; if missing add `aria-label="Back to top"` and `focus-visible` ring. (Will check during build; one-line fix at most.)
+- **`src/components/site-nav.tsx`** — menu/close buttons already have `aria-label`. Add `focus-visible` ring on the mobile menu trigger to match.
+- **Hero scroll indicator** (`src/routes/index.tsx` ~line 223) — `<a href="#about" aria-label="Scroll">` already labeled; add `focus-visible:outline-gold` for keyboard users.
+
+No content/copy edits, no other section touched.
 
 ## Out of scope
 
-- Regenerating any image, re-cropping, editing role copy.
-- `SkillPanel` redesign — only the grid card changes.
-- Any other section on the page.
-
-No new dependencies. Pure Tailwind.
+- Tools data file removal beyond `src/routes/index.tsx` (the section was inlined — nothing else to clean up).
+- SkillPanel changes.
+- Any redesign of cards beyond size/padding.
