@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import { SkillCard } from "@/components/skill-card";
+import { SkillPanel } from "@/components/skill-panel";
 import { SKILL_ROLES } from "@/data/skill-roles";
 import heroPortrait from "@/assets/premansh-hero.png";
 import { projects } from "@/data/projects";
@@ -303,7 +304,7 @@ function Skills() {
           role={activeRole}
           total={SKILL_ROLES.length}
           open={!!activeSlug}
-          onOpenChange={(o) => !o && setActiveSlug(null)}
+          onOpenChange={(o: boolean) => !o && setActiveSlug(null)}
         />
       </div>
     </section>
