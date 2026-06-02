@@ -36,7 +36,7 @@ export function SiteNav() {
           Premansh<span className="text-gold">.</span>
         </Link>
 
-        <nav className="hidden items-center gap-10 md:flex">
+        <nav className="hidden items-center gap-6 lg:flex xl:gap-10">
           {NAV.map((n) =>
             n.href.startsWith("/#") ? (
               <a key={n.href} href={n.href} className="gold-link text-sm text-foreground/80 hover:text-foreground">
@@ -51,7 +51,7 @@ export function SiteNav() {
           <ThemeToggle />
         </nav>
 
-        <div className="flex items-center gap-3 md:hidden">
+        <div className="flex items-center gap-3 lg:hidden">
           <ThemeToggle />
           <button
             aria-label="Open menu"
@@ -65,7 +65,7 @@ export function SiteNav() {
 
       {/* Mobile overlay */}
       <div
-        className={`fixed inset-0 z-[60] bg-background transition-opacity duration-500 md:hidden ${
+        className={`fixed inset-0 z-[60] bg-background transition-opacity duration-500 lg:hidden ${
           open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >
