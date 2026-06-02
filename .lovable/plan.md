@@ -1,86 +1,63 @@
-## Goal
+# Cinematic Editorial Preloader
 
-Keep the existing 11 cinematic images, titles, descriptions, numbering, and gold/charcoal/serif identity. Replace the oversized 2-col expanding cards with a compact, uniform 4-col marketplace-style grid, and move all expanded content into a premium side panel.
+Replace `src/components/preloader.tsx` with a full-screen "opening title sequence" that ends by handing the exact `premansh-hero.png` image off to the existing Hero section. No cuts, no fade-to-black, no swap.
 
-## What changes
+## Approach: one shared image, one timeline
 
-### 1. `src/components/skill-card.tsx` — compact uniform card
+The trick is that the preloader and the Hero render the **same image asset** (`@/assets/premansh-hero.png`, already imported at module top — same URL, browser-cached, zero reflow). The preloader paints a white overlay above the Hero, animates the title + a masked crop of the image, then dissolves the overlay precisely as the underlying Hero's own `heroFade` finishes. The visitor never sees a handoff because both layers are showing the same pixels in the same place at the moment of crossover.
 
-New layout (fixed structure, no inline expansion):
-
-```text
-┌────────────────────────┐
-│ 01     ROLE            │   ← top: number + category label
-├────────────────────────┤
-│                        │
-│   [cinematic image]    │   ← center: 4:5 image, object-cover
-│                        │
-├────────────────────────┤
-│ Web Designer           │   ← bottom: serif title
-│ Editorial layouts and  │   one-line tagline (clamped)
-│ considered digital…    │
-└────────────────────────┘
-```
-
-- Single `<button>` wrapping the card, fires `onOpen()` (no in-grid expansion, no `expanded` prop).
-- Image wrapper uses `aspect-[4/5]` so every card is identical height regardless of viewport.
-- Tagline clamped to one line on desktop, two on mobile (`line-clamp-1 md:line-clamp-2`).
-- Hover: `-translate-y-0.5`, gold ring fades in (`ring-gold/30`), image `scale-[1.04]` over 700ms, soft gold glow shadow. No card resize.
-- Pointer-reactive gold wash kept but toned down (smaller radius, lower opacity) so it reads at small size.
-- Remove `Plus`/`X`/"Explore" affordance — replaced by a tiny gold arrow in the top-right that animates on hover.
-
-### 2. `src/components/skill-panel.tsx` — new side panel for details
-
-Built on the existing shadcn `Sheet` primitive (`src/components/ui/sheet.tsx`), `side="right"`, width `w-full sm:max-w-xl lg:max-w-2xl`, background `bg-background`, charcoal hairline borders, gold accents.
-
-Panel content (same data already in `SKILL_ROLES`, no new fields):
-
-```text
-01 / 11                              ROLE
-Web Designer
-Editorial layouts and considered digital experiences.
-
-[cinematic image — 16:10, full panel width]
-
-Design philosophy        ← derived from existing tagline (no new copy)
-Areas of expertise       ← role.expertise
-Tools & technologies     ← role.tools (chip row)
-Selected work            ← role.selectedWork (links to /projects/$slug)
-Highlights               ← role.highlights
-```
-
-- One panel instance lives in the Skills section; opens for the active role.
-- Close via `X`, overlay click, or `Esc` (handled by Sheet).
-- Body scroll locked while open (Sheet default).
-- Reuses the existing `Block` styling pattern (gold uppercase label, hairlines).
-
-### 3. Skills section in `src/routes/index.tsx`
-
-- Grid: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8`.
-- State: `const [activeSlug, setActiveSlug] = useState<string | null>(null)`.
-- Each `<SkillCard role={r} total={11} onOpen={() => setActiveSlug(r.slug)} />`.
-- Render `<SkillPanel role={activeRole} open={!!activeSlug} onOpenChange={(o) => !o && setActiveSlug(null)} />` once at section root.
-- `Reveal` stagger preserved but reduced (cards are smaller — 40–60ms steps).
-- Section heading and intro copy unchanged.
-
-## Preserved
-
-- All 11 images in `src/assets/skills/*.jpg` — untouched.
-- `src/data/skill-roles.ts` shape and content — untouched (no schema change, future Supabase swap still 1:1).
-- Color tokens, `font-serif`, `Reveal`, `hairline`, gold accent, section background.
-- Tools section below Skills.
-
-## Out of scope
-
-- Regenerating or re-cropping any image.
-- Editing role copy, titles, tagline text, or order.
-- Supabase migration for `skill_roles`.
-- Any other section on the page.
+The Hero stays untouched. The preloader runs purely as an overlay that uninstalls itself after ~6s.
 
 ## Files
 
-- Edit: `src/components/skill-card.tsx` (rewrite into compact card, drop `expanded`/`onToggle` props).
-- New: `src/components/skill-panel.tsx` (Sheet-based detail view).
-- Edit: `src/routes/index.tsx` (Skills section — new grid + panel wiring; remove single-open `useState<string|null>` toggle logic in favor of `activeSlug` driving the panel).
+### Edit: `src/components/preloader.tsx` (full rewrite)
 
-No new dependencies. Pure Tailwind + existing shadcn Sheet.
+- `position: fixed inset-0 z-[100] bg-white` (light) — always white, ignores dark mode for this intro since the brief says "Pure white".
+- Single `useState` driving stage (0→5) via `setTimeout` chain, plus a final `done` flag that triggers `opacity-0 pointer-events-none` and unmounts after the transition.
+- One `<img src={heroPortrait} />` rendered inside a masked wrapper so it can grow from a small editorial crop to fill the viewport.
+- Title block centered with the same `font-serif` (Instrument Serif) the site already uses.
+
+Stage timeline (all easing `cubic-bezier(0.22, 1, 0.36, 1)`):
+
+```text
+0.0s  Stage 1: "PREMANSH PANIGRAHI" fades+rises (translateY 16→0, opacity 0→1, 700ms)
+0.45s            "2026" fades+rises (500ms)
+1.2s  Stage 2: image mask wrapper visible, starts as 38vw × 22vw centered,
+                opacity 0→0.9, clip-path inset shrinks from 12% to 0
+2.5s  Stage 3: mask wrapper scales from its editorial crop to 100vw × 100vh
+                (transform-origin center; uses width/height transition + scale),
+                title opacity 1→0 (600ms), slight translateY -8px
+4.0s  Stage 4: image now fills viewport at the exact size/position of the Hero
+                background <img> (object-cover object-center), title fully gone
+5.0s  Stage 5: white overlay opacity 1→0 over 800ms; nav + hero text + CTA
+                + scroll indicator are already animating in underneath via the
+                Hero's existing `fadeUp` keyframes (300–1800ms delays). Because
+                the preloader image and the Hero image are the same asset at the
+                same on-screen rect, the dissolve is invisible.
+6.0s            unmount preloader (display:none after transition)
+```
+
+Implementation details:
+
+- Use Tailwind arbitrary values + inline `style={{ transitionDuration, transitionTimingFunction }}` rather than custom keyframes — easier to chain.
+- Mask wrapper: `<div style={{ width, height, clipPath: 'inset(... round 2px)', transition: 'all 1.3s cubic-bezier(.22,1,.36,1)' }}>` containing the `<img className="h-full w-full object-cover object-center" />`. Stage 3 sets `width: 100vw; height: 100vh; clipPath: inset(0)`.
+- Title: two stacked lines, `text-[clamp(2rem,6vw,5rem)]`, `tracking-[0.02em]`, `text-foreground` (charcoal). Second line `2026` smaller, `text-[clamp(1rem,2vw,1.5rem)] tracking-[0.5em] text-foreground/70 mt-6`.
+- `prefers-reduced-motion`: skip stages, render `done` immediately after 200ms so screen readers / motion-sensitive users see only a brief white flash.
+- Add `aria-hidden` and lock `document.body.style.overflow = 'hidden'` during stages 0–4, restore at stage 5.
+
+### Edit: `src/routes/__root.tsx` (1-line change)
+
+`<Preloader />` already renders before `<SiteNav />` and `<Outlet />`. Keep that order — it's exactly what we need so the Hero is already mounted and the shared `<img>` is decoded by the time stage 5 starts. No changes needed beyond confirming render order, but I'll verify.
+
+## Preserved
+
+- `src/routes/index.tsx` Hero — untouched. The existing `heroFade` / `fadeUp` staggered entry animations become Stage 5 for free.
+- `src/components/site-nav.tsx` — untouched (its scroll listener already runs from mount).
+- All other components, routes, data, styles.
+- Dark mode behavior elsewhere on the site.
+
+## Out of scope
+
+- Hero redesign, new images, new fonts, new routes.
+- Any GSAP/Motion dependency — pure CSS transitions + setTimeout are enough for this sequence at 60fps.
+- Persisting "already seen" state across navigations (the brief describes the arrival experience; running once per full page load is appropriate and matches current behavior).
