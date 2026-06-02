@@ -123,3 +123,11 @@
   from { opacity: 0; transform: translateY(40px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* Hold Hero text/CTA/scroll-indicator animations until the preloader hands off.
+   The background portrait (img with heroFade) is excluded so it can keep its
+   own subtle scale-in. */
+body.preloading #top :not(img) {
+  animation-play-state: paused !important;
+}
+
