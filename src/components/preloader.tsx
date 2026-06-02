@@ -30,15 +30,15 @@ export function Preloader() {
     document.body.style.overflow = "hidden";
 
     const timers = [
-      setTimeout(() => setStage(1), 60),     // title in
-      setTimeout(() => setStage(2), 1200),   // image crop emerges
-      setTimeout(() => setStage(3), 2500),   // image expands, text fades
-      setTimeout(() => setStage(4), 4000),   // image fills viewport
+      setTimeout(() => setStage(1), 40),     // title in
+      setTimeout(() => setStage(2), 600),    // image crop emerges
+      setTimeout(() => setStage(3), 1300),   // image expands, text fades
+      setTimeout(() => setStage(4), 2100),   // image fills viewport
       setTimeout(() => {                     // white veil dissolves
         setStage(5);
         document.body.style.overflow = prevOverflow;
-      }, 5000),
-      setTimeout(() => setUnmount(true), 6200),
+      }, 2500),
+      setTimeout(() => setUnmount(true), 3300),
     ];
 
     return () => {
@@ -87,7 +87,7 @@ export function Preloader() {
         className="absolute inset-0 bg-white"
         style={{
           opacity: veilOpacity,
-          transition: `opacity 1000ms ${ease}`,
+          transition: `opacity 700ms ${ease}`,
         }}
       />
 
@@ -96,7 +96,7 @@ export function Preloader() {
         <div
           style={{
             ...maskStyle,
-            transition: `width 1500ms ${ease}, height 1500ms ${ease}, clip-path 1300ms ${ease}, opacity 900ms ${ease}`,
+            transition: `width 850ms ${ease}, height 850ms ${ease}, clip-path 750ms ${ease}, opacity 500ms ${ease}`,
             willChange: "width, height, clip-path, opacity",
           }}
         >
