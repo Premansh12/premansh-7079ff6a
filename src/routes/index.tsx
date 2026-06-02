@@ -66,7 +66,12 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(featuredProjectsQueryOptions),
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(featuredProjectsQueryOptions),
+      context.queryClient.ensureQueryData(featuredPhotosQueryOptions),
+    ]);
+  },
   errorComponent: () => (
     <div className="grid min-h-[60vh] place-items-center px-6 text-center">
       <p className="text-muted-foreground">Something went wrong. Please try again later.</p>
