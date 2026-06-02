@@ -155,8 +155,9 @@ function Index() {
       <Hero />
       <About />
       <Skills />
-      
+
       <FeaturedProjects />
+      <FeaturedFrames />
       <Certifications />
       <Contact />
     </>
