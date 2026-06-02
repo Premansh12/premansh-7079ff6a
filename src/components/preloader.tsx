@@ -121,7 +121,7 @@ export function Preloader() {
       {/* Editorial title block */}
       <div className="pointer-events-none absolute inset-0 grid place-items-center">
         <div
-          className="flex flex-col items-center text-center text-[#1a1a1a] mix-blend-difference"
+          className="flex flex-col items-center text-center text-foreground mix-blend-difference"
           style={{
             opacity: titleOut ? 0 : 1,
             transform: titleOut ? "translateY(-12px)" : "translateY(0)",
