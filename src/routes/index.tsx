@@ -33,8 +33,20 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(featuredProjectsQueryOptions),
+  errorComponent: () => (
+    <div className="grid min-h-[60vh] place-items-center px-6 text-center">
+      <p className="text-muted-foreground">Something went wrong. Please try again later.</p>
+    </div>
+  ),
+  notFoundComponent: () => (
+    <div className="grid min-h-[60vh] place-items-center px-6 text-center">
+      <p className="text-muted-foreground">Page not found.</p>
+    </div>
+  ),
   component: Index,
 });
+
 
 // ------------------------------------------------------------
 // Certifications — chronological journey, rendered as a
