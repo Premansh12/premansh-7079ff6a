@@ -446,7 +446,7 @@ function Contact() {
           </p>
           <div className="mt-10 space-y-2 text-sm">
             <a href="mailto:hello@premansh.dev" className="block gold-link">hello@premansh.dev</a>
-            <p className="text-background/60">Bhubaneswar / Remote · Available Q3 onward</p>
+            <p className="text-background/60">Jagdalpur / Remote · Available Q3 onward</p>
           </div>
         </div>
 
