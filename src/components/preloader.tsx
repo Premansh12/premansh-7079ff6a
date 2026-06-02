@@ -32,18 +32,18 @@ export function Preloader() {
     document.body.classList.add("preloading");
 
     const timers = [
-      setTimeout(() => setStage(1), 40),     // title in
-      setTimeout(() => setStage(2), 600),    // image crop emerges
-      setTimeout(() => setStage(3), 1300),   // image expands, text fades
+      setTimeout(() => setStage(1), 0),      // title in
+      setTimeout(() => setStage(2), 350),    // image crop emerges
+      setTimeout(() => setStage(3), 900),    // image expands, text fades
       setTimeout(() => {                     // image fills + unfreeze Hero anims
         setStage(4);
         document.body.classList.remove("preloading");
-      }, 2100),
+      }, 1400),
       setTimeout(() => {                     // veil dissolves while text staggers in
         setStage(5);
         document.body.style.overflow = prevOverflow;
-      }, 2400),
-      setTimeout(() => setUnmount(true), 4200),
+      }, 1500),
+      setTimeout(() => setUnmount(true), 2200),
     ];
 
     return () => {
