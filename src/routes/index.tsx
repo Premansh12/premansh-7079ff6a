@@ -19,6 +19,8 @@ import { SkillPanel } from "@/components/skill-panel";
 import { SKILL_ROLES } from "@/data/skill-roles";
 import heroPortrait from "@/assets/premansh-hero.png";
 import { listProjects } from "@/lib/projects.functions";
+import { listFeaturedPhotos } from "@/lib/photos.functions";
+import { PhotoSurfer } from "@/components/photo-surfer";
 import {
   EMAIL,
   MAILTO,
