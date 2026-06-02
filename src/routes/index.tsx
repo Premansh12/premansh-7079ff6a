@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
   ArrowDown,
@@ -13,7 +14,13 @@ import { SkillCard } from "@/components/skill-card";
 import { SkillPanel } from "@/components/skill-panel";
 import { SKILL_ROLES } from "@/data/skill-roles";
 import heroPortrait from "@/assets/premansh-hero.png";
-import { projects } from "@/data/projects";
+import { listProjects } from "@/lib/projects.functions";
+
+const featuredProjectsQueryOptions = queryOptions({
+  queryKey: ["projects", "list"],
+  queryFn: () => listProjects(),
+});
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
