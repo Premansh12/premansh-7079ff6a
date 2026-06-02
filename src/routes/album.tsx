@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import { z } from "zod";
 import { listPhotos } from "@/lib/photos.functions";
-import { PhotoSurfer } from "@/components/photo-surfer";
+import { PhotoDraggable } from "@/components/photo-draggable";
 import { PhotoStory } from "@/components/photo-story";
 import { Reveal } from "@/components/reveal";
 import { INSTAGRAM_PHOTO_URL } from "@/data/contact";
