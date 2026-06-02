@@ -1,10 +1,12 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
 import { z } from "zod";
 import { listPhotos } from "@/lib/photos.functions";
 import { PhotoStrip } from "@/components/photo-strip";
 import { PhotoChapter } from "@/components/photo-chapter";
 import { Reveal } from "@/components/reveal";
+import { INSTAGRAM_PHOTO_URL } from "@/data/contact";
 
 const photosQueryOptions = queryOptions({
   queryKey: ["photos"],
@@ -66,6 +68,17 @@ function AlbumPage() {
             <p className="mt-6 max-w-2xl text-sm text-muted-foreground md:text-base">
               Hover a frame to bring it forward. Click to step into the story behind it.
             </p>
+          </Reveal>
+          <Reveal delay={320}>
+            <a
+              href={INSTAGRAM_PHOTO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="group mt-8 inline-flex items-center gap-3 text-sm uppercase tracking-[0.25em] text-gold transition-colors hover:text-foreground"
+            >
+              Follow My Photography Journey
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </a>
           </Reveal>
         </div>
       </section>
