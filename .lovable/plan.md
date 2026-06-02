@@ -1,58 +1,89 @@
-# Polish pass: faster handoff, denser skills, drop the Kit, fix a11y nits
+## Findings — full data-flow audit
 
-Used the accessibility skill to audit interactive bits along the way.
+### Step 1 — Database contents
+- The Supabase database has exactly one user-facing table: `photos`.
+- **There is no `projects` table.** It has never existed, so there is nothing to query, no rows, no RLS, no GRANTs to debug.
 
-## 1. Preloader → Hero handoff (faster, no lag)
+### Step 2 — Supabase connection
+- The Lovable Cloud connection itself is healthy. `src/integrations/supabase/client.ts` is wired correctly; the `photos` table (used by `/album`) reads fine, which proves URL, anon key, and client init are all good.
+- So the connection is **not** the problem.
 
-`src/components/preloader.tsx` — compress the timeline and overlap the veil dissolve with Hero text staggering in, so there's no gap.
+### Step 3 — Query execution
+- Nothing in the app ever queries `projects` from Supabase. Search across `src/` shows zero references to `supabase.from("projects")`.
+- All project rendering imports from a **static file**: `src/data/projects.ts` (`import { projects } from "@/data/projects"`). Used by:
+  - `src/routes/index.tsx` (Featured Projects — `projects.slice(0, 4)`)
+  - `src/routes/projects.index.tsx` (all-projects grid)
+  - `src/routes/projects.$slug.tsx` (detail page, via `getProject` / `getAdjacent` / `getRelated`)
+  - `src/routes/sitemap[.]xml.ts`
 
-```text
-old → new
-40   → 0     Stage 1 (title in)
-600  → 350   Stage 2 (image crop emerges)
-1300 → 900   Stage 3 (image expands, title fades)
-2100 → 1400  Stage 4 (image fills, unfreeze Hero anims)
-2400 → 1500  Stage 5 (veil dissolves, 500ms)
-4200 → 2200  unmount
-```
+### Step 4 — RLS
+- Not applicable. No table exists, so RLS is not the blocker. (If/when we create one, we'll add a public-read policy + GRANT to anon.)
 
-Also drop the veil dissolve duration from 700ms → 500ms and reduce mask transition from 850ms → 600ms. Net experience: ~2.2s from blank to interactive Hero, with the Hero text already staggering in during the last 700ms — no perceptible pause.
+### Step 5 — Frontend rendering
+- The grid and featured-projects logic are correct. There are no hidden filters, no `featured` flag, no category filter accidentally hiding rows.
+- `projects.ts` currently exports an array with **1 entry** (`mascara-skincare`). So today the home page should show 1 featured card and `/projects` should show 1 card. If the user is seeing "no projects", it's because they expected the array to be longer or to be Supabase-driven, not because rendering is broken.
 
-## 2. Drop the Tools / Kit section from home
+### Step 6 — Dynamic pages
+- `projects.$slug.tsx` is fully template-driven off the `Project` shape, so any new entry — static or from Supabase — produces a complete case study with zero template work. No hardcoded per-project pages remain.
 
-`src/routes/index.tsx`:
-- Remove `<Tools />` from the `Index()` JSX.
-- Delete the `Tools` function (lines 317–389).
-- Delete the `TOOL_GROUPS` data and `Tool` / `ToolGroup` types (lines 95–146).
+---
 
-Skills section stays; nothing else changes around it.
+## Root Cause
 
-## 3. Skill cards: smaller & more compact
+The Projects section is **not connected to Supabase at all**. The codebase intentionally ships a static `projects` array (see comments at top of `src/data/projects.ts`) and only one project has been populated. There is no failing query, no RLS block, no fetch bug — just no data source wired up.
 
-`src/components/skill-card.tsx`:
-- Change card aspect from `aspect-[16/9]` → `aspect-[2/1]` (much shorter — ~340×170 at 4-col desktop).
-- Image column from `38%` → `34%`.
-- Padding `p-5` → `px-4 py-3`.
-- Title size `text-lg md:text-xl` → `text-base md:text-lg`.
-- Tighten internal vertical rhythm via `gap-1.5` on the flex column (replaces `justify-between` which over-spaced when card is short).
-- Keep cursor wash, gold hover ring, image scale, `Explore →` arrow — just at smaller scale.
+---
 
-`src/routes/index.tsx` Skills grid: gap `gap-4 lg:gap-5` → `gap-3 lg:gap-4`, Reveal stagger `30ms` → `20ms`.
+## Recommended Fix (simplest)
 
-## 4. Accessibility / polish nits
+Wire Projects to Supabase end-to-end, keeping the same `Project` shape so route templates don't change:
 
-Audit results (only the actual hits — most shadcn primitives are fine):
+1. **Migration** — create `public.projects` mirroring the `Project` type:
+   - columns: `slug` (text, unique), `title`, `category`, `year`, `cover`, `tagline`, `role`, `stack` (text[]), `overview`, `challenge`, `solution`, `process`, `results` (text[]), `gallery` (jsonb), `behance_url` (text, nullable), `sort_order` (int, default 0), `created_at`
+   - GRANT `SELECT` to `anon` + `authenticated`; `ALL` to `service_role`
+   - Enable RLS, single policy: `FOR SELECT USING (true)` (portfolio is public)
+2. **Server fns** in `src/lib/projects.functions.ts`:
+   - `listProjects()` → ordered by `sort_order, created_at desc`
+   - `getProjectBySlug(slug)`
+   - `getAdjacentProjects(slug)` and `getRelatedProjects(slug)` (same signatures as today)
+3. **Route loaders** — convert each route to use `ensureQueryData` + `useSuspenseQuery` per the TanStack Query default. Add `errorComponent` + `notFoundComponent`.
+4. **Seed** the one existing project (`mascara-skincare`) by inserting the current static row, so nothing visually regresses.
+5. **Delete** `src/data/projects.ts` once routes compile against the loaders. Update `sitemap[.]xml.ts` to read from the loader too.
 
-- **`src/components/preloader.tsx`** — the title block currently sets `text-[#1a1a1a]` then a wrapper uses `mix-blend-difference` with white children. Result is correct but hardcoded color; switch the wrapper to `text-foreground` so it follows theme tokens (passes a11y review's "no arbitrary colors" rule). No visual change.
-- **`src/components/skill-card.tsx`** — outer `<button>` already has `aria-label`; add `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background` so keyboard focus is visible (currently relies on browser default which the rounded border swallows).
-- **`src/components/back-to-top.tsx`** — verify `aria-label`; if missing add `aria-label="Back to top"` and `focus-visible` ring. (Will check during build; one-line fix at most.)
-- **`src/components/site-nav.tsx`** — menu/close buttons already have `aria-label`. Add `focus-visible` ring on the mobile menu trigger to match.
-- **Hero scroll indicator** (`src/routes/index.tsx` ~line 223) — `<a href="#about" aria-label="Scroll">` already labeled; add `focus-visible:outline-gold` for keyboard users.
+---
 
-No content/copy edits, no other section touched.
+## Alternative Fixes
 
-## Out of scope
+- **A. Quick win, no backend** — just append more entries to `src/data/projects.ts`. Zero infra; every new project = a code edit.
+- **B. Keep static, add a build-time import script** — a Node script reads a Behance gallery URL and appends a new entry to `projects.ts`. Still no DB, still requires a commit per project.
+- **C. Full Supabase + admin UI** — Supabase table + a small `/admin/projects` page (auth-gated) for CRUD. Best long-term but most work up front.
 
-- Tools data file removal beyond `src/routes/index.tsx` (the section was inlined — nothing else to clean up).
-- SkillPanel changes.
-- Any redesign of cards beyond size/padding.
+---
+
+## Architecture Recommendation
+
+**Option D — Supabase + Behance Import Workflow** is the right fit. Reasoning against the stated criteria:
+
+- **GitHub Pages hosting**: not a constraint here — this app runs on Lovable's serverless runtime, which can call Supabase from server functions. Static-only hosting is not required.
+- **Behance portfolio integration**: the import workflow is what makes this scale. New case studies enter via a small server fn that accepts a Behance URL, scrapes/normalizes the metadata + image URLs, and inserts a row.
+- **Future project growth**: a `projects` table scales linearly; no code edits per project.
+- **Minimal maintenance**: one schema, one loader, one importer.
+- **Dynamic project pages**: already templated — they just need a data loader instead of a static array.
+- **Future AI-assisted imports**: easy to layer on. The importer becomes "AI fills the `overview / challenge / solution / process / results` fields from the Behance scrape, you review, you publish."
+
+Why not the others:
+- **A (fully dynamic Supabase, no importer)** is fine but leaves the Behance step manual — every new project still means copy/pasting 10 image URLs.
+- **B (hybrid metadata + Behance hot-linked images)** is brittle. Behance CDN URLs change and break. Better to copy the images into Supabase Storage at import time.
+- **C (static JSON)** is what we have today, and is exactly what surfaces this bug — the user expected database-backed content and got an unpopulated array.
+
+---
+
+## Technical details (build-mode work, listed for transparency)
+
+- New migration creating `public.projects` + GRANTs + RLS policy.
+- New file `src/lib/projects.functions.ts` with the four server fns above (all read-only, no auth middleware needed since the table is public-read).
+- Edits to `src/routes/index.tsx`, `src/routes/projects.index.tsx`, `src/routes/projects.$slug.tsx`, `src/routes/sitemap[.]xml.ts` to consume the loader.
+- Seed insert for the existing Mascara Skincare row.
+- Importer (`src/lib/projects.import.functions.ts`) is a follow-up; not part of the first cut unless you want it included now.
+
+Want me to proceed with the Recommended Fix as the first cut (schema + loader + route wiring + seed), and tackle the Behance importer in a second pass?

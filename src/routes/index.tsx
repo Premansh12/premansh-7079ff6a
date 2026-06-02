@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
   ArrowDown,
@@ -13,7 +14,13 @@ import { SkillCard } from "@/components/skill-card";
 import { SkillPanel } from "@/components/skill-panel";
 import { SKILL_ROLES } from "@/data/skill-roles";
 import heroPortrait from "@/assets/premansh-hero.png";
-import { projects } from "@/data/projects";
+import { listProjects } from "@/lib/projects.functions";
+
+const featuredProjectsQueryOptions = queryOptions({
+  queryKey: ["projects", "list"],
+  queryFn: () => listProjects(),
+});
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,8 +33,20 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(featuredProjectsQueryOptions),
+  errorComponent: () => (
+    <div className="grid min-h-[60vh] place-items-center px-6 text-center">
+      <p className="text-muted-foreground">Something went wrong. Please try again later.</p>
+    </div>
+  ),
+  notFoundComponent: () => (
+    <div className="grid min-h-[60vh] place-items-center px-6 text-center">
+      <p className="text-muted-foreground">Page not found.</p>
+    </div>
+  ),
   component: Index,
 });
+
 
 // ------------------------------------------------------------
 // Certifications — chronological journey, rendered as a
@@ -262,7 +281,8 @@ function Skills() {
 
 
 function FeaturedProjects() {
-  const featured = projects.slice(0, 4);
+  const { data: allProjects } = useSuspenseQuery(featuredProjectsQueryOptions);
+  const featured = allProjects.slice(0, 4);
   return (
     <section id="work" className="px-6 py-32 md:px-12 md:py-48">
       <div className="mx-auto max-w-7xl">

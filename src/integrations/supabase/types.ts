@@ -59,6 +59,72 @@ export type Database = {
         }
         Relationships: []
       }
+      projects: {
+        Row: {
+          behance_url: string | null
+          category: string
+          challenge: string
+          cover: string
+          created_at: string
+          gallery: Json
+          id: string
+          overview: string
+          process: string
+          results: string[]
+          role: string
+          slug: string
+          solution: string
+          sort_order: number
+          stack: string[]
+          tagline: string
+          title: string
+          updated_at: string
+          year: string
+        }
+        Insert: {
+          behance_url?: string | null
+          category: string
+          challenge?: string
+          cover: string
+          created_at?: string
+          gallery?: Json
+          id?: string
+          overview?: string
+          process?: string
+          results?: string[]
+          role?: string
+          slug: string
+          solution?: string
+          sort_order?: number
+          stack?: string[]
+          tagline: string
+          title: string
+          updated_at?: string
+          year: string
+        }
+        Update: {
+          behance_url?: string | null
+          category?: string
+          challenge?: string
+          cover?: string
+          created_at?: string
+          gallery?: Json
+          id?: string
+          overview?: string
+          process?: string
+          results?: string[]
+          role?: string
+          slug?: string
+          solution?: string
+          sort_order?: number
+          stack?: string[]
+          tagline?: string
+          title?: string
+          updated_at?: string
+          year?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
