@@ -92,11 +92,12 @@ export const Route = createFileRoute("/projects/$slug")({
 function ProjectPage() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(projectDetailQueryOptions(slug));
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   // ensureQueryData + notFound guarantees data here, but guard for types.
   if (!data) return null;
   const { project, prev, next, related } = data;
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const galleryUrls = project.gallery.map((g: { src: string }) => g.src);
+
 
 
   return (
