@@ -49,6 +49,11 @@ const featuredProjectsQueryOptions = queryOptions({
   queryFn: () => listProjects(),
 });
 
+const featuredPhotosQueryOptions = queryOptions({
+  queryKey: ["photos", "featured"],
+  queryFn: () => listFeaturedPhotos({ data: { limit: 8 } }),
+});
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
