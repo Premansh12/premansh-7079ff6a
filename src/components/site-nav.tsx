@@ -1,108 +1,83 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useState } from "react";
+import {
+  Navbar,
+  NavBody,
+  NavItems,
+  NavbarLogo,
+  NavbarButton,
+  MobileNav,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+} from "./ui/resizable-navbar";
 import { ThemeToggle } from "./theme-toggle";
 
 const NAV = [
-  { href: "/#about", label: "About" },
-  { href: "/#skills", label: "Skills" },
-  { href: "/projects", label: "Projects" },
-  { href: "/album", label: "Album" },
-  { href: "/#certifications", label: "Certifications" },
-  { href: "/#contact", label: "Contact" },
+  { name: "About", link: "/#about" },
+  { name: "Skills", link: "/#skills" },
+  { name: "Projects", link: "/projects" },
+  { name: "Album", link: "/album" },
+  { name: "Certifications", link: "/#certifications" },
 ];
 
 export function SiteNav() {
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "backdrop-blur-md bg-background/75 border-b border-border/60"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-12">
-        <Link to="/" className="font-serif text-xl tracking-tight">
-          Premansh<span className="text-gold">.</span>
-        </Link>
-
-        <nav className="hidden items-center gap-6 lg:flex xl:gap-10">
-          {NAV.map((n) =>
-            n.href.startsWith("/#") ? (
-              <a key={n.href} href={n.href} className="gold-link text-sm text-foreground/80 hover:text-foreground">
-                {n.label}
-              </a>
-            ) : (
-              <Link key={n.href} to={n.href} className="gold-link text-sm text-foreground/80 hover:text-foreground">
-                {n.label}
-              </Link>
-            ),
-          )}
+    <Navbar>
+      <NavBody>
+        <NavbarLogo />
+        <NavItems items={NAV} />
+        <div className="relative z-20 flex items-center gap-3">
           <ThemeToggle />
-        </nav>
-
-        <div className="flex items-center gap-3 lg:hidden">
-          <ThemeToggle />
-          <button
-            aria-label="Open menu"
-            onClick={() => setOpen(true)}
-            className="grid h-9 w-9 place-items-center rounded-full border border-border/60"
-          >
-            <Menu className="h-4 w-4" />
-          </button>
+          <NavbarButton href="/#contact" variant="gold">
+            Contact
+          </NavbarButton>
         </div>
-      </div>
+      </NavBody>
 
-      {/* Mobile overlay */}
-      <div
-        className={`fixed inset-0 z-[60] bg-background transition-opacity duration-500 lg:hidden ${
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-      >
-        <div className="flex items-center justify-between px-6 py-5">
-          <span className="font-serif text-xl">Premansh<span className="text-gold">.</span></span>
-          <button
-            aria-label="Close menu"
-            onClick={() => setOpen(false)}
-            className="grid h-9 w-9 place-items-center rounded-full border border-border/60"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <nav className="flex flex-col gap-8 px-8 pt-16">
-          {NAV.map((n) =>
-            n.href.startsWith("/#") ? (
+      <MobileNav>
+        <MobileNavHeader>
+          <NavbarLogo />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <MobileNavToggle isOpen={open} onClick={() => setOpen(!open)} />
+          </div>
+        </MobileNavHeader>
+
+        <MobileNavMenu isOpen={open} onClose={() => setOpen(false)}>
+          {NAV.map((item) =>
+            item.link.startsWith("/#") ? (
               <a
-                key={n.href}
-                href={n.href}
+                key={item.link}
+                href={item.link}
                 onClick={() => setOpen(false)}
-                className="font-serif text-5xl text-foreground"
+                className="w-full font-serif text-2xl text-foreground"
               >
-                {n.label}
+                {item.name}
               </a>
             ) : (
               <Link
-                key={n.href}
-                to={n.href}
+                key={item.link}
+                to={item.link}
                 onClick={() => setOpen(false)}
-                className="font-serif text-5xl text-foreground"
+                className="w-full font-serif text-2xl text-foreground"
               >
-                {n.label}
+                {item.name}
               </Link>
             ),
           )}
-        </nav>
-      </div>
-    </header>
+          <NavbarButton
+            href="/#contact"
+            variant="gold"
+            className="mt-2 w-full"
+            onClick={() => setOpen(false)}
+          >
+            Contact
+          </NavbarButton>
+        </MobileNavMenu>
+      </MobileNav>
+    </Navbar>
   );
 }
