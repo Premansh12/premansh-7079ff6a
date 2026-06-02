@@ -11,9 +11,6 @@ type Props = {
   onSelect?: (slug: string) => void;
 };
 
-// Deterministic scattered moodboard layout — cycles through preset slots so
-// SSR and client render identically (no hydration jump) and every photo is
-// visible at rest.
 const SLOTS = [
   "top-[4%] left-[6%] rotate-[-6deg]",
   "top-[8%] left-[28%] rotate-[3deg]",
@@ -32,6 +29,7 @@ const SLOTS = [
 
 export function PhotoDraggable({ photos, onSelect }: Props) {
   const navigate = useNavigate();
+  const boundaryRef = useRef<HTMLDivElement>(null);
 
   const open = (slug: string) => {
     if (onSelect) return onSelect(slug);
@@ -39,8 +37,11 @@ export function PhotoDraggable({ photos, onSelect }: Props) {
   };
 
   return (
-    <DraggableCardContainer className="relative h-[180vh] w-full md:h-[140vh]">
-      <p className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-[10px] uppercase tracking-[0.4em] text-[#1a1a1a]/15 md:text-xs">
+    <DraggableCardContainer
+      ref={boundaryRef}
+      className="relative h-[180vh] w-full rounded-[3px] border border-border/70 bg-background dot-grid shadow-[inset_0_0_0_1px_rgba(0,0,0,0.02)] md:h-[140vh]"
+    >
+      <p className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-[10px] uppercase tracking-[0.4em] text-foreground/15 md:text-xs">
         Drag · Toss · Click to read
       </p>
 
@@ -51,6 +52,7 @@ export function PhotoDraggable({ photos, onSelect }: Props) {
           slotClass={SLOTS[i % SLOTS.length]}
           onOpen={open}
           eager={i < 4}
+          boundaryRef={boundaryRef}
         />
       ))}
     </DraggableCardContainer>
@@ -62,16 +64,19 @@ function DraggablePhotoCard({
   slotClass,
   onOpen,
   eager,
+  boundaryRef,
 }: {
   photo: Photo;
   slotClass: string;
   onOpen: (slug: string) => void;
   eager: boolean;
+  boundaryRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const downPos = useRef<{ x: number; y: number } | null>(null);
 
   return (
     <DraggableCardBody
+      dragConstraints={boundaryRef}
       className={`${slotClass} h-[22rem] w-56 md:h-[26rem] md:w-64`}
       onPointerDownCapture={(e) => {
         downPos.current = { x: e.clientX, y: e.clientY };

@@ -1,47 +1,29 @@
-## Goal
+## Album page polish
 
-Replace the horizontal 3D scroll rail on `/album` with a **draggable, scattered photo card stack** (Aceternity-style draggable cards), keeping all existing data wiring (Supabase `photos` table, slug deep-linking, PhotoStory panel) and the luxury editorial design language (white/cream bg, charcoal type, gold accents, Instrument Serif).
+### 1. Dotted canvas + visible boundary
+- Add a subtle dot-grid background to the `PhotoDraggable` container (CSS `radial-gradient` of 1px dots at ~24px spacing, low-opacity ink color, themed).
+- Wrap the moodboard in a visible boundary: a thin hairline border with rounded corners and inset shadow, sitting inside the section padding so users see where cards can be tossed.
+- Constrain drag to that boundary instead of the full window: replace the `useEffect` that sets `constraints` from `window.innerWidth/innerHeight` with a `dragConstraints` ref pointing at the container element (passed down via a context or prop on `DraggableCardContainer`). Cards can no longer fly off-screen.
 
-## Scope
+### 2. Increase drag sensitivity / throw
+In `src/components/ui/draggable-card.tsx`:
+- Lower spring damping and raise stiffness on the post-release `animate` calls so cards travel further and settle faster.
+- Increase the velocity multiplier from `0.3` → `~0.6` so a flick throws the card noticeably further.
+- Raise the max `bounce` cap from `0.8` → `1.0` and tune the springs (`stiffness: 80`, `damping: 12`) for a more physical toss.
+- Add `dragElastic: 0.8` (up from default ~0.5) so the card follows the cursor more responsively.
 
-- Only the `/album` rail experience changes. Featured Frames on homepage continues to use the existing compact `PhotoSurfer` (no change).
-- Data, server functions, storage, schema, and PhotoStory panel are **unchanged**.
+### 3. Theme on /album
+The route hardcodes `bg-[#fbf9f4] text-[#222]` and the moodboard uses `#1a1a1a` text, so the global `ThemeToggle` has no effect on this page. Fix:
+- Replace hardcoded colors on `src/routes/album.tsx` with semantic tokens: `bg-background text-foreground`, `text-muted-foreground`, etc. Headline uses `text-foreground`, helper copy uses `text-muted-foreground`.
+- In `src/components/photo-draggable.tsx`, swap the centered watermark `text-[#1a1a1a]/15` for `text-foreground/15`, and the card caption gradient/colors stay (they sit over the photo, so they remain ink-on-image and work in both themes).
+- In `draggable-card.tsx`, swap `bg-[#efeae0]` for `bg-card` so the card frame follows theme. Keep shadow.
+- Verify `ThemeToggle` itself works (it does — toggles `.dark` on `<html>`). The bug is only that album styles ignored tokens.
 
-## Changes
+### Files touched
+- `src/routes/album.tsx` — semantic colors, dotted/boundary wrapper around `<PhotoDraggable />`.
+- `src/components/photo-draggable.tsx` — pass container ref for boundary constraints, themed watermark.
+- `src/components/ui/draggable-card.tsx` — accept `dragConstraints` ref, raise sensitivity, themed card bg.
+- `src/styles.css` — add a `.dot-grid` utility (themed via `currentColor` or token).
 
-### 1. Add primitive: `src/components/ui/draggable-card.tsx`
-- Port the supplied component verbatim (uses `motion/react`, already installed for CometCard).
-- Exports `DraggableCardBody` and `DraggableCardContainer`.
-- Keep `cn` import from `@/lib/utils`. Cards: `rounded-[2px]` to match `surfer-card-frame` aesthetic instead of `rounded-md`, and swap `bg-neutral-100 dark:bg-neutral-900` for our cream `#efeae0` so it matches the editorial frame.
-
-### 2. New composed component: `src/components/photo-draggable.tsx`
-- Takes `photos: Photo[]` and optional `onSelect(slug)`.
-- Renders a `DraggableCardContainer` with `relative` positioning, min height `~85vh`, on the cream `#fbf9f4` canvas of /album.
-- Centered backdrop caption (under the cards, low opacity) — serif headline already lives in the page header, so the backdrop text reads small/muted: e.g. "Drag · Toss · Explore" in gold tracked caps. Optional; can be omitted to keep it pure.
-- Maps photos to `DraggableCardBody` instances scattered with deterministic-but-varied `top/left/rotate` classes (computed from index so layout is stable across renders, not random per render — avoids hydration jumps). Example pattern cycles through 7 preset positions like the demo.
-- Each card: 3:4 aspect, `w-64 md:w-72`, the photo as a full-bleed `<img>` inside, with a thin caption strip at the bottom showing title (serif) + location (charcoal xs). Click (non-drag) opens the story panel via `onSelect(slug)`.
-- Click vs drag: track pointer-down position; only fire `onSelect` if pointer moved < 6px between down and up (standard drag-vs-click guard). This avoids the story opening every time the user tosses a card.
-- Respects `prefers-reduced-motion`: falls back to a static masonry-style grid of the same cards (no drag, no rotation) so the page remains usable.
-
-### 3. Update `src/routes/album.tsx`
-- Replace `<PhotoSurfer photos={photos} onSelect={open} />` with `<PhotoDraggable photos={photos} onSelect={open} />`.
-- Adjust the surrounding section: remove the `pb-24 md:pb-32` rail wrapper, use a `relative` full-width container sized to hold the scattered cards (e.g. `min-h-[85vh]`).
-- Update the header copy hint: change "Scroll, drag, or use the arrow keys to surf the rail" → "Drag the frames around. Click one to open its story." Keep everything else (eyebrow, headline, frame count, Instagram CTA) intact.
-- Keep `PhotoStory` deep-linking via `?photo=<slug>` unchanged.
-
-### 4. Keep PhotoSurfer
-- Do **not** delete `src/components/photo-surfer.tsx`; the homepage Featured Frames still uses it.
-
-## Out of scope
-- No database / storage / server function changes.
-- No homepage changes.
-- No new dependencies (`motion` is already installed).
-
-## Files
-
-- **Created:** `src/components/ui/draggable-card.tsx`, `src/components/photo-draggable.tsx`
-- **Edited:** `src/routes/album.tsx`
-
-## Open question
-
-Should the scattered layout be **fully overlapping pile** (demo-style, cards stacked with rotations across center) or **spread across the canvas** (more like a pinned moodboard, less overlap, every photo visible at rest)? I'll default to **moodboard spread** since the journal has many photos and a pure pile would hide most of them — let me know if you'd rather have the tight pile.
+### Out of scope
+Homepage `PhotoSurfer`, lightbox, data layer, Supabase. No new deps.

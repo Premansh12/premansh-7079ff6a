@@ -16,17 +16,19 @@ export const DraggableCardBody = ({
   children,
   onPointerDownCapture,
   onPointerUpCapture,
+  dragConstraints,
 }: {
   className?: string;
   children?: React.ReactNode;
   onPointerDownCapture?: (e: React.PointerEvent) => void;
   onPointerUpCapture?: (e: React.PointerEvent) => void;
+  dragConstraints?: React.RefObject<HTMLElement | null>;
 }) => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const controls = useAnimationControls();
-  const [constraints, setConstraints] = useState({
+  const [fallbackConstraints, setFallbackConstraints] = useState({
     top: 0,
     left: 0,
     right: 0,
@@ -44,9 +46,10 @@ export const DraggableCardBody = ({
   const glareOpacity = useSpring(useTransform(mouseX, [-300, 0, 300], [0.18, 0, 0.18]), springConfig);
 
   useEffect(() => {
+    if (dragConstraints) return;
     const updateConstraints = () => {
       if (typeof window !== "undefined") {
-        setConstraints({
+        setFallbackConstraints({
           top: -window.innerHeight / 2,
           left: -window.innerWidth / 2,
           right: window.innerWidth / 2,
@@ -57,7 +60,7 @@ export const DraggableCardBody = ({
     updateConstraints();
     window.addEventListener("resize", updateConstraints);
     return () => window.removeEventListener("resize", updateConstraints);
-  }, []);
+  }, [dragConstraints]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const { clientX, clientY } = e;
@@ -79,7 +82,10 @@ export const DraggableCardBody = ({
     <motion.div
       ref={cardRef}
       drag
-      dragConstraints={constraints}
+      dragConstraints={dragConstraints ?? fallbackConstraints}
+      dragElastic={0.8}
+      dragMomentum={true}
+      dragTransition={{ power: 0.6, timeConstant: 350, bounceStiffness: 120, bounceDamping: 12 }}
       onDragStart={() => {
         document.body.style.cursor = "grabbing";
       }}
@@ -95,14 +101,14 @@ export const DraggableCardBody = ({
         const velocityMagnitude = Math.sqrt(
           currentVelocityX * currentVelocityX + currentVelocityY * currentVelocityY,
         );
-        const bounce = Math.min(0.8, velocityMagnitude / 1000);
-        animate(info.point.x, info.point.x + currentVelocityX * 0.3, {
-          duration: 0.8, ease: [0.2, 0, 0, 1], bounce,
-          type: "spring", stiffness: 50, damping: 15, mass: 0.8,
+        const bounce = Math.min(1.0, velocityMagnitude / 800);
+        animate(info.point.x, info.point.x + currentVelocityX * 0.6, {
+          duration: 0.9, ease: [0.2, 0, 0, 1], bounce,
+          type: "spring", stiffness: 80, damping: 12, mass: 0.7,
         });
-        animate(info.point.y, info.point.y + currentVelocityY * 0.3, {
-          duration: 0.8, ease: [0.2, 0, 0, 1], bounce,
-          type: "spring", stiffness: 50, damping: 15, mass: 0.8,
+        animate(info.point.y, info.point.y + currentVelocityY * 0.6, {
+          duration: 0.9, ease: [0.2, 0, 0, 1], bounce,
+          type: "spring", stiffness: 80, damping: 12, mass: 0.7,
         });
       }}
       style={{ rotateX, rotateY, opacity, willChange: "transform" }}
@@ -113,7 +119,7 @@ export const DraggableCardBody = ({
       onPointerDownCapture={onPointerDownCapture}
       onPointerUpCapture={onPointerUpCapture}
       className={cn(
-        "relative min-h-96 w-80 overflow-hidden rounded-[2px] bg-[#efeae0] p-0 shadow-2xl transform-3d cursor-grab active:cursor-grabbing",
+        "relative min-h-96 w-80 overflow-hidden rounded-[2px] bg-card p-0 shadow-2xl transform-3d cursor-grab active:cursor-grabbing",
         className,
       )}
     >
@@ -126,12 +132,14 @@ export const DraggableCardBody = ({
   );
 };
 
-export const DraggableCardContainer = ({
-  className,
-  children,
-}: {
-  className?: string;
-  children?: React.ReactNode;
-}) => {
-  return <div className={cn("relative overflow-clip", className)}>{children}</div>;
-};
+export const DraggableCardContainer = React.forwardRef<
+  HTMLDivElement,
+  { className?: string; children?: React.ReactNode }
+>(({ className, children }, ref) => {
+  return (
+    <div ref={ref} className={cn("relative overflow-clip", className)}>
+      {children}
+    </div>
+  );
+});
+DraggableCardContainer.displayName = "DraggableCardContainer";
