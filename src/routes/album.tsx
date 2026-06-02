@@ -91,9 +91,9 @@ function AlbumPage() {
         </div>
       </section>
 
-      {/* The surfer rail */}
+      {/* Draggable moodboard */}
       <section className="pb-24 md:pb-32">
-        <PhotoSurfer photos={photos} onSelect={open} />
+        <PhotoDraggable photos={photos} onSelect={open} />
       </section>
 
       {selected && <PhotoStory photo={selected} onClose={close} />}
