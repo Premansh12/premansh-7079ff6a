@@ -27,10 +27,10 @@ export const Route = createFileRoute("/album")({
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(photosQueryOptions),
   component: AlbumPage,
-  errorComponent: ({ error }) => (
+  errorComponent: () => (
     <div className="mx-auto max-w-3xl px-6 py-40 text-center" role="alert">
       <h1 className="font-serif text-3xl">Couldn't load the album</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
+      <p className="mt-2 text-sm text-muted-foreground">Something went wrong. Please try again later.</p>
     </div>
   ),
   notFoundComponent: () => <div className="px-6 py-40 text-center">No photos yet.</div>,
