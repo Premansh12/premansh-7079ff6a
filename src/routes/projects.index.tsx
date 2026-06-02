@@ -1,7 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowUpRight } from "lucide-react";
 import { Reveal } from "@/components/reveal";
-import { projects } from "@/data/projects";
+import { listProjects } from "@/lib/projects.functions";
+
+const projectsQueryOptions = queryOptions({
+  queryKey: ["projects", "list"],
+  queryFn: () => listProjects(),
+});
 
 export const Route = createFileRoute("/projects/")({
   head: () => ({
@@ -14,10 +20,23 @@ export const Route = createFileRoute("/projects/")({
     ],
     links: [{ rel: "canonical", href: "/projects" }],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(projectsQueryOptions),
+  errorComponent: () => (
+    <div className="grid min-h-screen place-items-center px-6 text-center">
+      <p className="text-muted-foreground">Couldn't load projects. Please try again later.</p>
+    </div>
+  ),
+  notFoundComponent: () => (
+    <div className="grid min-h-screen place-items-center px-6 text-center">
+      <p className="text-muted-foreground">Page not found.</p>
+    </div>
+  ),
   component: ProjectsHub,
 });
 
 function ProjectsHub() {
+  const { data: projects } = useSuspenseQuery(projectsQueryOptions);
+
   return (
     <section className="px-6 pb-24 pt-40 md:px-12 md:pb-32 md:pt-48">
       <div className="mx-auto max-w-7xl">
