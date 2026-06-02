@@ -73,8 +73,8 @@ function AlbumPage() {
           <Reveal delay={220}>
             <p className="mt-5 max-w-xl text-sm text-[#555] md:text-base">
               A visual archive of places, experiments, observations, and stories.
-              Scroll, drag, or use the arrow keys to surf the rail. Click a frame
-              to open the journal entry behind it.
+              Drag the frames around the canvas. Click one to open the journal
+              entry behind it.
             </p>
           </Reveal>
           <Reveal delay={320}>
