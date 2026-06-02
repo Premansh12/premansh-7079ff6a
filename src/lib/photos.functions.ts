@@ -21,6 +21,9 @@ export const listPhotos = createServerFn({ method: "GET" }).handler(async () => 
     .select("id,title,image_url,location,category,story,camera,lens,settings,date_taken,sort_order")
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("listPhotos failed:", error);
+    throw new Error("Failed to load photos. Please try again later.");
+  }
   return (data ?? []) as Photo[];
 });
